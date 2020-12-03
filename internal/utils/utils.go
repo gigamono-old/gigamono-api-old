@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/joho/godotenv"
@@ -25,4 +25,3 @@ func LoadEnvFile() {
 
 	fmt.Printf("Mongdb URI [loadEnv] (%v)\n", os.Getenv("MONGODB_URI"))
 }
-

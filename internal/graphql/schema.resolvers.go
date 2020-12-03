@@ -8,12 +8,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sageflow/sageflow-backend/internal/database"
 	"github.com/sageflow/sageflow-backend/internal/graphql/generated"
 	"github.com/sageflow/sageflow-backend/internal/graphql/model"
-	"github.com/sageflow/sageflow-backend/internal/database"
 	"github.com/sageflow/sageflow-backend/internal/utils"
 )
-
 
 func initializeDatabase() *database.DB {
 	// Load env file.
