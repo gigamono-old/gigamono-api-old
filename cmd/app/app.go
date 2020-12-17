@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/contrib/static"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -31,9 +32,15 @@ func main() {
 	// Load env file.
 	utils.LoadEnvFile()
 
-	// Setting up GraphQL
 	r := gin.Default()
+
+	// Serving files in ../sageflow-ui/dist.
+	r.Use(static.Serve("/", static.LocalFile("../sageflow-ui/dist", true)))
+
+	// Setting up GraphQL.
 	r.POST("/query", graphqlHandler())
-	r.GET("/", playgroundHandler())
+	r.GET("/play", playgroundHandler())
+
+	// Listen on port.
 	r.Run(defaultPort)
 }
