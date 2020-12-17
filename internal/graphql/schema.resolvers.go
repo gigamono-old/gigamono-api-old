@@ -14,6 +14,7 @@ import (
 	"github.com/sageflow/sageflow-backend/internal/utils"
 )
 
+// MOVE OUT OF FILE !!!
 // Function is called when file is imported
 func initializeDatabase() *database.DB {
 	// Load env file.

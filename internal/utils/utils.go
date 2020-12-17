@@ -2,8 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/joho/godotenv"
@@ -13,15 +11,13 @@ import (
 func LoadEnvFile() {
 	path, err := filepath.Abs(".env")
 	if err != nil {
-		log.Fatalf("Unable to resolve path: Error: %v", err)
+		return
 	}
 
 	fmt.Printf("dir [loadEnv] (%v)\n", path)
 
 	err = godotenv.Load(path)
 	if err != nil {
-		log.Fatalf("Unable to load .env file: Error: %v", err)
+		return
 	}
-
-	fmt.Printf("Mongdb URI [loadEnv] (%v)\n", os.Getenv("MONGODB_URI"))
 }
