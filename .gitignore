@@ -1,3 +1,6 @@
 **/.DS_Store
 public/
 .env
+tmp/
+logs/
+api

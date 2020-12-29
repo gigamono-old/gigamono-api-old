@@ -7,6 +7,6 @@ type NewUser struct {
 }
 
 type User struct {
-	ID   string `json:"id" bson:"_id"`
-	Name string `json:"name" bson:"name"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
