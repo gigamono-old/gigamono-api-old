@@ -2,20 +2,24 @@ package database
 
 import (
 	"log"
-	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // ConnectPostgresDB connects to Postgres database.
-func ConnectPostgresDB() *DB {
-	connectionString := os.Getenv("DB_CONNECTION_STRING")
+func ConnectPostgresDB(connectionString string, newLogger *logger.Interface) *gorm.DB {
+	db, err := gorm.Open(
+		postgres.Open(connectionString),
+		&gorm.Config{
+			Logger: *newLogger,
+		},
+	)
 
-	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
 	if err != nil {
 		log.Panic("Cannot continue without a database.\n")
 	}
 
-	return &DB{connection: db}
+	return db
 }

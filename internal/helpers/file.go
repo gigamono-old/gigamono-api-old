@@ -20,6 +20,6 @@ func OpenFile(path string, isAppend bool) (*os.File, error) {
 		return nil, err
 	}
 
-	// Sec: No point giving permission to other users.
-	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY|append, 0600)
+	// Sec: No point giving other non-grp users permissions.
+	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY|append, 0660)
 }
