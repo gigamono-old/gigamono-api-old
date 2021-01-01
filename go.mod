@@ -1,4 +1,4 @@
-module github.com/sageflow/sageflow-api
+module github.com/sageflow/sageapi
 
 go 1.15
 
@@ -6,15 +6,8 @@ require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.6.3
-	github.com/google/uuid v1.1.2
-	github.com/joho/godotenv v1.3.0
-	github.com/lib/pq v1.3.0
-	github.com/sageflow/sageflow-backend v0.0.0-20201217214822-3248c7abe3bc // indirect
+	github.com/sageflow/sagedb v0.0.0-20210101213946-f6de5fe4d3a1
+	github.com/sageflow/sageflow-api v0.0.0-20201231023814-3324a55a7059
+	github.com/sageflow/sageutils v0.0.0-20210101211914-62801f4c8381
 	github.com/vektah/gqlparser/v2 v2.1.0
-	go.mongodb.org/mongo-driver v1.4.4
-	gorm.io/datatypes v1.0.0
-	gorm.io/driver/mysql v1.0.3
-	gorm.io/driver/postgres v1.0.6
-	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.20.9
 )

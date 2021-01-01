@@ -6,11 +6,10 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 
-	"github.com/sageflow/sageflow-api/internal/graphql"
-	"github.com/sageflow/sageflow-api/internal/graphql/generated"
-	"github.com/sageflow/sageflow-api/internal/helpers"
-
-	"github.com/sageflow/sageflow-api/internal/database"
+	"github.com/sageflow/sageapi/internal/graphql"
+	"github.com/sageflow/sageapi/internal/graphql/generated"
+	"github.com/sageflow/sageutils"
+	"github.com/sageflow/sagedb"
 )
 
 const defaultPort = ":3000"
@@ -23,28 +22,21 @@ func graphqlHandler() gin.HandlerFunc {
 }
 
 func main() {
-	// Set where initialization log output goes.
-	helpers.SetStatusLogFile()
+	sageutils.SetStatusLogFile() // Set where initialization log output goes.
 
-	// Load env file.
-	helpers.LoadEnvFile()
+	sageutils.LoadEnvFile() // Load env file.
 
-	// Handle CLI arguments.
-	// helpers.ProcessArgs()
+	// processArgs() // Handle CLI arguments.
 
-	// Set up database.
-	db := database.Setup()
-	defer db.Close() // Close database on exit,
+	db := sagedb.Connect() // Set up database.
 
-	// Create router.
-	router := gin.Default()
+	defer db.Close() // Close database on exit.
 
-	// Serving files in ../sageflow-ui/dist.
-	router.Use(static.Serve("/", static.LocalFile("../sageflow-ui/dist", true)))
+	router := gin.Default() // Create router.
 
-	// Setting up GraphQL.
-	router.POST("/query", graphqlHandler())
+	router.Use(static.Serve("/", static.LocalFile("../sageflow-ui/dist", true))) // Serving files in ../sageflow-ui/dist.
 
-	// Listen on port.
-	router.Run(defaultPort)
+	router.POST("/query", graphqlHandler()) // Setting up GraphQL.
+
+	router.Run(defaultPort) // Listen on port.
 }

@@ -9,7 +9,7 @@ exec:
 
 # Uncomment to enable federation
 # federation:
-#   filename: internal/graphq/generated/federation.go
+#   filename: internal/graphql/generated/federation.go
 #   package: generated
 
 # Where should any generated models go?
@@ -35,7 +35,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "github.com/sageflow/sageflow-api/internal/graphql/model"
+  - "github.com/sageflow/sageapi/internal/graphql/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
