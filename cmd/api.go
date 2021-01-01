@@ -8,8 +8,8 @@ import (
 
 	"github.com/sageflow/sageapi/internal/graphql"
 	"github.com/sageflow/sageapi/internal/graphql/generated"
-	"github.com/sageflow/sageutils"
 	"github.com/sageflow/sagedb"
+	"github.com/sageflow/sageutils"
 )
 
 const defaultPort = ":3000"
@@ -22,7 +22,7 @@ func graphqlHandler() gin.HandlerFunc {
 }
 
 func main() {
-	sageutils.SetStatusLogFile() // Set where initialization log output goes.
+	sageutils.SetStatusLogFile() // Set where status log output goes.
 
 	sageutils.LoadEnvFile() // Load env file.
 
