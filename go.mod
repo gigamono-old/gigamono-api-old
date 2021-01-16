@@ -8,7 +8,11 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sageflow/sagedb v0.0.0-20210101213946-f6de5fe4d3a1
-	github.com/sageflow/sageutils v0.0.0-20210101211914-62801f4c8381
+	github.com/sageflow/sageutils v0.0.0-20210105150335-9448053ab68b
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
 )
+
+replace github.com/sageflow/sagedb v0.0.0-20210101213946-f6de5fe4d3a1 => ../sagedb
+
+replace github.com/sageflow/sageutils v0.0.0-20210105150335-9448053ab68b => ../sageutils
