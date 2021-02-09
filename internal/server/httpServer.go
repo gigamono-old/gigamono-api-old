@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (server *Server) httpServe(listener net.Listener) error {
+func (server *APIServer) httpServe(listener net.Listener) error {
 	server.setRoutes() // Set routes.
 
 	// Use http server.

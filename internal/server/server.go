@@ -10,21 +10,21 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Server represents an new REST-based server instance.
-type Server struct {
+// APIServer represents an new REST-based server instance.
+type APIServer struct {
 	*gin.Engine
 	Port string
 }
 
-// NewServer creates a new server instance.
-func NewServer() Server {
-	return Server{
+// NewAPIServer creates a new server instance.
+func NewAPIServer() APIServer {
+	return APIServer{
 		Engine: gin.Default(),
 	}
 }
 
 // Listen makes the server listen on specified port.
-func (server *Server) Listen(port string) error {
+func (server *APIServer) Listen(port string) error {
 	// Set port.
 	server.Port = port
 
@@ -47,7 +47,7 @@ func (server *Server) Listen(port string) error {
 	return grp.Wait()
 }
 
-func (server *Server) setRoutes() {
+func (server *APIServer) setRoutes() {
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true))) // Serving files in ../sageflow-ui/dist.
 	server.POST("/query", graphql.Handler())                                // Setting up GraphQL.
 }

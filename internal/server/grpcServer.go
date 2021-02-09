@@ -11,7 +11,7 @@ import (
 	"github.com/sageflow/sageapi/internal/proto"
 )
 
-func (server *Server) grpcServe(listener net.Listener) error {
+func (server *APIServer) grpcServe(listener net.Listener) error {
 	grpcServer := grpc.NewServer() // Create a gRPC server.
 
 	// Register gRPC service.
@@ -22,7 +22,7 @@ func (server *Server) grpcServe(listener net.Listener) error {
 }
 
 // SayHello says Hello
-func (server *Server) SayHello(ctx context.Context, msg *proto.Message) (*proto.Message, error) {
+func (server *APIServer) SayHello(ctx context.Context, msg *proto.Message) (*proto.Message, error) {
 	serverMsg := "Server replies: " + msg.Content
 	fmt.Println(serverMsg)
 	response := proto.Message{
