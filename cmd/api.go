@@ -2,21 +2,21 @@ package main
 
 import (
 	"github.com/sageflow/sagedb/pkg/database"
-	"github.com/sageflow/sageutils/pkg/envs"
-	"github.com/sageflow/sageutils/pkg/logs"
+	"github.com/sageflow/sageflow/pkg/envs"
+	"github.com/sageflow/sageflow/pkg/logs"
 
 	"github.com/sageflow/sageapi/internal/server"
 )
 
 func main() {
 	// Set up log status file and load .env file.
-	logs.SetStatusLogFile()
-	envs.LoadEnvFile()
+	logs.SetStatusLogFile() // TODO. logs.SetStatusLogFile(config.Logging.Status.Filepath)
+	envs.LoadEnvFile()      // TODO. Remove!
 
 	// Connect to database.
-	database.Connect()
+	database.Connect() // TODO. db := database.Connect(config.db)
 
 	// Create and start server.
-	serv := server.NewServer("3000") // TODO: Get from .env with a default value.
-	serv.Start()
+	serv := server.NewServer() // TODO. server.NewServer(db, config)
+	serv.Listen("3000") // TODO. database.Connect(config.Server.API.Port)
 }
