@@ -1,11 +1,13 @@
 package server
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sageflow/sageapi/internal/graphql"
+	"github.com/sageflow/sageflow/pkg/inits"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 )
@@ -13,23 +15,21 @@ import (
 // APIServer represents an new REST-based server instance.
 type APIServer struct {
 	*gin.Engine
-	Port string
+	inits.App
 }
 
 // NewAPIServer creates a new server instance.
-func NewAPIServer() APIServer {
+func NewAPIServer(app inits.App) APIServer {
 	return APIServer{
 		Engine: gin.Default(),
+		App: app,
 	}
 }
 
 // Listen makes the server listen on specified port.
-func (server *APIServer) Listen(port string) error {
-	// Set port.
-	server.Port = port
-
+func (server *APIServer) Listen() error {
 	// Listener on TCP port.
-	listener, err := net.Listen("tcp", ":"+server.Port)
+	listener, err := net.Listen("tcp", fmt.Sprint(":", server.Config.Server.API.Port))
 	if err != nil {
 		return err
 	}

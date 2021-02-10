@@ -23,7 +23,7 @@ func (server *APIServer) grpcServe(listener net.Listener) error {
 
 // SayHello says Hello
 func (server *APIServer) SayHello(ctx context.Context, msg *proto.Message) (*proto.Message, error) {
-	serverMsg := "Server replies: " + msg.Content
+	serverMsg := "API replies: " + msg.Content
 	fmt.Println(serverMsg)
 	response := proto.Message{
 		Content: serverMsg,
