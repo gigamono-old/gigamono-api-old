@@ -1,12 +1,11 @@
 syntax = "proto3";
 option go_package = "github.com/sageflow/sageapi/internal/proto";
 
+message APINull {}
 
 message Message {
     string content = 1;
 }
-
-message Empty {}
 
 service APIService {
     rpc SayHello(Message) returns (Message);

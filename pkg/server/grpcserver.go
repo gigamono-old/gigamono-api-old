@@ -18,6 +18,7 @@ func (server *APIServer) grpcServe(listener net.Listener) error {
 	proto.RegisterAPIServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
+
 	return grpcServer.Serve(listener) // Listen for requests.
 }
 
