@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/sageflow/sageapi/internal/proto"
+	"github.com/sageflow/sageflow/pkg/services/proto"
 )
 
 func (server *APIServer) grpcServe(listener net.Listener) error {
@@ -17,7 +17,6 @@ func (server *APIServer) grpcServe(listener net.Listener) error {
 	// Register gRPC service.
 	proto.RegisterAPIServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
-
 
 	return grpcServer.Serve(listener) // Listen for requests.
 }
