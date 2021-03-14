@@ -6,7 +6,7 @@ import (
 
 	"github.com/sageflow/sageflow/pkg/logs"
 	"github.com/sageflow/sageflow/pkg/services"
-	"github.com/sageflow/sageflow/pkg/services/proto"
+	"github.com/sageflow/sageflow/pkg/services/proto/generated"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/soheilhy/cmux"
@@ -21,37 +21,45 @@ type APIServer struct {
 	*gin.Engine
 	inits.App
 	Validate            validator.Validate
-	AuthServiceClient   proto.AuthServiceClient
-	EngineServiceClient proto.EngineServiceClient
+	AuthServiceClient   generated.AuthServiceClient
+	EngineServiceClient generated.EngineServiceClient
 }
 
 // NewAPIServer creates a new server instance.
 func NewAPIServer(app inits.App) (APIServer, error) {
 	validate := *validator.New()
+	var (
+		authServiceClient   generated.AuthServiceClient
+		engineServiceClient generated.EngineServiceClient
+	)
 
-	authServiceClient, err := services.GetInsecureServiceClient("localhost", 3002, app.Config)
+	client, err := services.GetInsecureServiceClient("localhost", 3002, app.Config)
 	if err != nil {
-		logs.FmtPrintln("While initialising API server: Unable to connect to Auth Service:", err)
+		logs.FmtPrintln("initialising API server: unable to connect to Auth Service:", err)
+	} else {
+		authServiceClient = client.(generated.AuthServiceClient)
 	}
 
-	engineServiceClient, err := services.GetInsecureServiceClient("localhost", 3001, app.Config)
+	client, err = services.GetInsecureServiceClient("localhost", 3001, app.Config)
 	if err != nil {
-		logs.FmtPrintln("While initialising API server: Unable to connect to Engine Service:", err)
+		logs.FmtPrintln("initialising API server: unable to connect to Engine Service:", err)
+	} else {
+		engineServiceClient = client.(generated.EngineServiceClient)
 	}
 
 	return APIServer{
 		Engine:              gin.Default(),
 		App:                 app,
 		Validate:            validate,
-		AuthServiceClient:   authServiceClient.(proto.AuthServiceClient),
-		EngineServiceClient: engineServiceClient.(proto.EngineServiceClient),
+		AuthServiceClient:   authServiceClient,
+		EngineServiceClient: engineServiceClient,
 	}, nil
 }
 
 // Listen makes the server listen on specified port.
 func (server *APIServer) Listen() error {
 	// Listener on TCP port.
-	listener, err := net.Listen("tcp", fmt.Sprint(":", server.Config.Server.API.Port))
+	listener, err := net.Listen("tcp", fmt.Sprint(":", server.Config.Services.Types.API.Port))
 	if err != nil {
 		return err
 	}

@@ -41,7 +41,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Validate func(ctx context.Context, obj interface{}, next graphql.Resolver, rules *string) (res interface{}, err error)
+	Tag func(ctx context.Context, obj interface{}, next graphql.Resolver, validate *string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -244,7 +244,7 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
-directive @validate(rules: String) on INPUT_FIELD_DEFINITION
+directive @tag(validate: String) on INPUT_FIELD_DEFINITION
 
 type User {
   id: String!
@@ -265,8 +265,8 @@ type SessionTokens {
 }
 
 input UserInput {
-  email: String! @validate(rules: "email")
-  password: String! @validate(rules: "lt=5")
+  email: String! @tag(validate: "email,lt=256")
+  password: String! @tag(validate: "lt=100")
 }
 
 type Query {
@@ -274,7 +274,7 @@ type Query {
 }
 
 type Mutation {
-  createUser(user: UserInput!): User!
+  createUser(user: UserInput!): User
 }
 `, BuiltIn: false},
 }
@@ -284,18 +284,18 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_validate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_tag_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
-	if tmp, ok := rawArgs["rules"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rules"))
+	if tmp, ok := rawArgs["validate"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("validate"))
 		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["rules"] = arg0
+	args["validate"] = arg0
 	return args, nil
 }
 
@@ -399,14 +399,11 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Profile_username(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
@@ -1920,14 +1917,14 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				rules, err := ec.unmarshalOString2ᚖstring(ctx, "email")
+				validate, err := ec.unmarshalOString2ᚖstring(ctx, "email,lt=256")
 				if err != nil {
 					return nil, err
 				}
-				if ec.directives.Validate == nil {
-					return nil, errors.New("directive validate is not implemented")
+				if ec.directives.Tag == nil {
+					return nil, errors.New("directive tag is not implemented")
 				}
-				return ec.directives.Validate(ctx, obj, directive0, rules)
+				return ec.directives.Tag(ctx, obj, directive0, validate)
 			}
 
 			tmp, err := directive1(ctx)
@@ -1946,14 +1943,14 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				rules, err := ec.unmarshalOString2ᚖstring(ctx, "lt=5")
+				validate, err := ec.unmarshalOString2ᚖstring(ctx, "lt=100")
 				if err != nil {
 					return nil, err
 				}
-				if ec.directives.Validate == nil {
-					return nil, errors.New("directive validate is not implemented")
+				if ec.directives.Tag == nil {
+					return nil, errors.New("directive tag is not implemented")
 				}
-				return ec.directives.Validate(ctx, obj, directive0, rules)
+				return ec.directives.Tag(ctx, obj, directive0, validate)
 			}
 
 			tmp, err := directive1(ctx)
@@ -1997,9 +1994,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createUser":
 			out.Values[i] = ec._Mutation_createUser(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2442,10 +2436,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -2481,16 +2471,6 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋsageflowᚋsageapi
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUserInput2githubᚗcomᚋsageflowᚋsageapiᚋinternalᚋgraphqlᚋmodelᚐUserInput(ctx context.Context, v interface{}) (model.UserInput, error) {

@@ -20,7 +20,11 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))                                                          // Serving files in ../sageflow-ui/dist.
-	server.POST("/query", graphql.QueryHandler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)) // Handling the query route
-	server.GET("/playground", graphql.PlaygroundHandler())                                                                           // Handling playground route
+	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
+	playgroundHandler := graphql.PlaygroundHandler()
+
+	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true))) // Serves files in ../sageflow-ui/dist.
+	server.POST("/graphql", graphqlHandler)                                 // Handles all graphql requests.
+	server.GET("/graphql", graphqlHandler)                                  // Handles query-only graphql requests.
+	server.GET("/playground", playgroundHandler)                            // Shows playground UI.
 }

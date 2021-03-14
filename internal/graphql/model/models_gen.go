@@ -3,24 +3,21 @@
 package model
 
 type Profile struct {
-	Username  string  `json:"username"`
-	Email     string  `json:"email"`
-	FirstName *string `json:"firstName"`
-	LastName  *string `json:"lastName"`
+	Username  string  `json:"username" `
+	Email     string  `json:"email" `
+	FirstName *string `json:"firstName" `
+	LastName  *string `json:"lastName" `
 }
-
 type SessionTokens struct {
-	AccessToken string `json:"accessToken"`
-	CsrfToken   string `json:"csrfToken"`
+	AccessToken string `json:"accessToken" `
+	CsrfToken   string `json:"csrfToken" `
 }
-
 type User struct {
-	ID      string         `json:"id"`
-	Profile *Profile       `json:"profile"`
-	Tokens  *SessionTokens `json:"tokens"`
+	ID      string         `json:"id" `
+	Profile *Profile       `json:"profile" `
+	Tokens  *SessionTokens `json:"tokens" `
 }
-
 type UserInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"email,lt=256"`
+	Password string `json:"password" validate:"lt=100"`
 }

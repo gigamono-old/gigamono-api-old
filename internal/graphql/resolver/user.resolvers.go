@@ -5,26 +5,38 @@ package resolver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/sageflow/sageapi/internal/graphql/generated"
 	"github.com/sageflow/sageapi/internal/graphql/model"
+	gql "github.com/sageflow/sageflow/pkg/services/graphql"
+	proto "github.com/sageflow/sageflow/pkg/services/proto/generated"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, user model.UserInput) (*model.User, error) {
-	// Return error if AuthService is nil.
-	if r.AuthService == nil {
-		return nil, errors.New("Unable to create new user because server is not connected to Auth Service")
+	// Check for validation errors.
+	if err := gql.ValidateStructAndAppendErrors(ctx, r.Validate, user, "user"); err != nil {
+		return nil, nil
 	}
 
-	// Validate input.
-	fmt.Println(">>> errs =", r.State.ValidationErrorMessages)
+	// Return error if AuthService is nil.
+	if r.AuthService == nil {
+		panic(fmt.Errorf("create user: AuthServiceClient is not set"))
+	}
 
 	// Get token from AuthService/GetSignUpToken.
+	response, err := r.AuthService.GetSignInToken(ctx, &proto.UserTokenRequest{})
+	if err != nil {
+		panic(fmt.Errorf("create user: unable to get signin token: %s", err))
+	}
 
-	// Return result.
-	return &model.User{}, nil
+	// TODO: Otherwise save in the resource DB.
+	return &model.User{
+		ID: "xyz",
+		Tokens: &model.SessionTokens{
+			AccessToken: response.AccessToken,
+		},
+	}, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
