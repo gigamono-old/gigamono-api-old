@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/sageflow/sageflow/pkg/logs"
-	"github.com/sageflow/sageflow/pkg/services"
+	"github.com/sageflow/sageflow/pkg/services/grpc"
 	"github.com/sageflow/sageflow/pkg/services/proto/generated"
 
 	"github.com/go-playground/validator/v10"
@@ -33,14 +33,14 @@ func NewAPIServer(app inits.App) (APIServer, error) {
 		engineServiceClient generated.EngineServiceClient
 	)
 
-	client, err := services.GetInsecureServiceClient("localhost", 3002, app.Config)
+	client, err := grpc.GetInsecureServiceClient("localhost", 3002, app.Config)
 	if err != nil {
 		logs.FmtPrintln("initialising API server: unable to connect to Auth Service:", err)
 	} else {
 		authServiceClient = client.(generated.AuthServiceClient)
 	}
 
-	client, err = services.GetInsecureServiceClient("localhost", 3001, app.Config)
+	client, err = grpc.GetInsecureServiceClient("localhost", 3001, app.Config)
 	if err != nil {
 		logs.FmtPrintln("initialising API server: unable to connect to Engine Service:", err)
 	} else {

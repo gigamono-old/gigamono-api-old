@@ -21,16 +21,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, user model.UserInput)
 
 	// Return error if AuthService is nil.
 	if r.AuthService == nil {
-		panic(fmt.Errorf("create user: AuthServiceClient is not set"))
+		panic(fmt.Errorf("in graphql createUser: AuthServiceClient is not set"))
 	}
 
 	// Get token from AuthService/GetSignUpToken.
 	response, err := r.AuthService.GetSignInToken(ctx, &proto.UserTokenRequest{})
 	if err != nil {
-		panic(fmt.Errorf("create user: unable to get signin token: %s", err))
+		panic(fmt.Errorf("in graphql createUser: unable to get signin token: %s", err))
 	}
 
-	// TODO: Otherwise save in the resource DB.
+	// Send verification email if enabled. Otherwise just create user.
+	// r.EmailDriver.Send(...)
+
+	// Might return user or not depending on config.
 	return &model.User{
 		ID: "xyz",
 		Tokens: &model.SessionTokens{
