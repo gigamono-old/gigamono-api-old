@@ -1,0 +1,36 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+directive @tag(validate: String) on INPUT_FIELD_DEFINITION
+
+type User {
+  id: String!
+  profile: Profile!
+  tokens: SessionTokens
+}
+
+type Profile {
+  username: String!
+  email: String!
+  firstName: String
+  lastName: String
+}
+
+type SessionTokens {
+  accessToken: String!
+  csrfToken: String!
+}
+
+input UserInput {
+  email: String! @tag(validate: "email,lt=256")
+  password: String! @tag(validate: "lt=100")
+}
+
+type Query {
+  users: [User]!
+}
+
+type Mutation {
+  createUser(user: UserInput!): User
+}

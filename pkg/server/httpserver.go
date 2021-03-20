@@ -23,7 +23,7 @@ func (server *APIServer) setRoutes() {
 	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
 	playgroundHandler := graphql.PlaygroundHandler()
 
-	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true))) // Serves files in ../sageflow-ui/dist.
+	server.Use(static.Serve("/", static.LocalFile("../sageui/public", true))) // Serves files in ../sageflow-ui/dist.
 	server.POST("/graphql", graphqlHandler)                                 // Handles all graphql requests.
 	server.GET("/graphql", graphqlHandler)                                  // Handles query-only graphql requests.
 	server.GET("/playground", playgroundHandler)                            // Shows playground UI.
