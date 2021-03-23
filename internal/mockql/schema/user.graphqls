@@ -2,14 +2,15 @@
 #
 # https://gqlgen.com/getting-started/
 
-directive @tag(validate: String) on INPUT_FIELD_DEFINITION
-
+# User
 type User {
   id: String!
-  profile: Profile!
   tokens: SessionTokens
+  profile: Profile!
+  layoutPreferences: LayoutPreferences
 }
 
+# Profile
 type Profile {
   username: String!
   email: String!
@@ -17,20 +18,37 @@ type Profile {
   lastName: String
 }
 
+# Layout
+type LayoutPreferences {
+  activityBarMainShortcuts: [Button]
+  activityBarSpaceShortcuts: [Button]
+  activityBarOtherShortcuts: [Button]
+}
+
+type Button {
+  name: String # The id for identifying the button
+  label: String # The label on the button
+  iconURL: String # The icon on the button
+  initials: String # The
+}
+
+# Tokens
 type SessionTokens {
   accessToken: String!
   csrfToken: String!
 }
 
-input UserInput {
-  email: String! @tag(validate: "email,lt=256")
-  password: String! @tag(validate: "lt=100")
+# New User
+input NewUserInput {
+  email: String!
+  password: String!
 }
 
 type Query {
-  users: [User]!
+  getUsers: [User]!
+  getCurrentUser: User
 }
 
 type Mutation {
-  createUser(user: UserInput!): User
+  createUser(user: NewUserInput!): User
 }

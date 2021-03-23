@@ -1,16 +1,14 @@
-package graphql
+package mockql
 
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/sageflow/sageflow/pkg/services/graphql/handlers"
 
-	"github.com/sageflow/sageapi/internal/graphql/generated"
-	"github.com/sageflow/sageapi/internal/graphql/resolver"
+	"github.com/sageflow/sageapi/internal/mockql/generated"
+	"github.com/sageflow/sageapi/internal/mockql/resolver"
 	"github.com/sageflow/sageflow/pkg/inits"
-	"github.com/sageflow/sageflow/pkg/services/graphql/directives"
 	"github.com/sageflow/sageflow/pkg/services/graphql/interceptors"
 	proto "github.com/sageflow/sageflow/pkg/services/proto/generated"
 )
@@ -25,14 +23,10 @@ func Handler(app *inits.App, validate *validator.Validate, authService proto.Aut
 			EngineService: engineService,
 			Validate:      validate,
 		},
-		Directives: generated.DirectiveRoot{
-			Tag: directives.Tag,
-		},
 	}))
 
 	// Add middlewares.
 	handler.Use(interceptors.ErrorModifier{})
-	handler.SetRecoverFunc(handlers.PanicHandler)
 
 	return func(ctx *gin.Context) {
 		// Sec: Responses escaped by json.Marshal so there is some protection against XSS.

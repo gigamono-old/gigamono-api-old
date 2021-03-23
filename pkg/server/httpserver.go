@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/contrib/static"
-	"github.com/sageflow/sageapi/internal/graphql"
+	"github.com/sageflow/sageapi/internal/mockql"
 )
 
 func (server *APIServer) httpServe(listener net.Listener) error {
@@ -20,8 +20,8 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
-	playgroundHandler := graphql.PlaygroundHandler()
+	graphqlHandler := mockql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
+	playgroundHandler := mockql.PlaygroundHandler()
 
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true))) // Serves files in ../sageflow-ui/dist.
 	server.POST("/graphql", graphqlHandler)                                 // Handles all graphql requests.

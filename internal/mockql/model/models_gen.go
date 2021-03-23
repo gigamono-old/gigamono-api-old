@@ -2,6 +2,21 @@
 
 package model
 
+type Button struct {
+	Name     *string `json:"name" `
+	Label    *string `json:"label" `
+	IconURL  *string `json:"iconURL" `
+	Initials *string `json:"initials" `
+}
+type LayoutPreferences struct {
+	ActivityBarMainShortcuts  []*Button `json:"activityBarMainShortcuts" `
+	ActivityBarSpaceShortcuts []*Button `json:"activityBarSpaceShortcuts" `
+	ActivityBarOtherShortcuts []*Button `json:"activityBarOtherShortcuts" `
+}
+type NewUserInput struct {
+	Email    string `json:"email" `
+	Password string `json:"password" `
+}
 type Profile struct {
 	Username  string  `json:"username" `
 	Email     string  `json:"email" `
@@ -13,11 +28,8 @@ type SessionTokens struct {
 	CsrfToken   string `json:"csrfToken" `
 }
 type User struct {
-	ID      string         `json:"id" `
-	Profile *Profile       `json:"profile" `
-	Tokens  *SessionTokens `json:"tokens" `
-}
-type UserInput struct {
-	Email    string `json:"email" validate:"email,lt=256"`
-	Password string `json:"password" validate:"lt=100"`
+	ID                string             `json:"id" `
+	Tokens            *SessionTokens     `json:"tokens" `
+	Profile           *Profile           `json:"profile" `
+	LayoutPreferences *LayoutPreferences `json:"layoutPreferences" `
 }
