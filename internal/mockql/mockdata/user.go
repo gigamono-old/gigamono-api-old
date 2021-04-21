@@ -5,28 +5,33 @@ import (
 	"github.com/sageflow/sageflow/pkg/strs"
 )
 
-// GetCurrentUser ...
-func GetCurrentUser() *model.User {
-	return &model.User{
-		ID:                     "4e6c8b75-4a74-42fd-84b3-f319a8f153c6",
-		Profile:                getCurrentUserProfile(),
-		LayoutPreferences:      getCurrentUserPreferencesLayout(),
-		Workspaces:             getCurrentUserWorkspaces(),
-		SelectedWorkspaceIndex: 0,
-		Projects:               getCurrentUserProjectsBasic(),
-		SelectedProjectIndex:   0,
+// GetSessionUser ...
+func GetSessionUser() *model.SessionUser {
+	return &model.SessionUser{
+		ID:                            "4e6c8b75-4a74-42fd-84b3-f319a8f153c6",
+		Profile:                       getSessionUserProfile(),
+		LayoutPreferences:             getSessionUserPreferencesLayout(),
+		Workspaces:                    getSessionUserWorkspaces(),
+		WorkspaceIndex:                0,
+		WorkspaceProjects:             getWorkspaceProjects(),
+		WorkspaceProjectIndex:         0,
+		WorkspaceProjectWorkflows:     getWorkspaceProjectWorkflows(),
+		WorkspaceProjectWorkflowIndex: 0,
+		WorkspaceProjectDocuments:     getWorkspaceProjectDocuments(),
+		WorkspaceProjectDocumentIndex: 0,
+		WorkspaceIntegrations:         getWorkspaceIntegrations(),
 	}
 }
 
-func getCurrentUserPreferencesLayout() *model.LayoutPreferences {
+func getSessionUserPreferencesLayout() *model.LayoutPreferences {
 	return &model.LayoutPreferences{
-		ActivityBarMainShortcuts:  getCurrentUserActivityBarMainShortcuts(),
-		ActivityBarSpaceShortcuts: getCurrentUserActivityBarSpaceShortcuts(),
-		ActivityBarOtherShortcuts: getCurrentUserActivityBarOtherShortcuts(),
+		ActivityBarMainShortcuts:  getSessionUserActivityBarMainShortcuts(),
+		ActivityBarSpaceShortcuts: getSessionUserActivityBarSpaceShortcuts(),
+		ActivityBarOtherShortcuts: getSessionUserActivityBarOtherShortcuts(),
 	}
 }
 
-func getCurrentUserActivityBarMainShortcuts() []*model.ShortcutButton {
+func getSessionUserActivityBarMainShortcuts() []*model.ShortcutButton {
 	return []*model.ShortcutButton{
 		&model.ShortcutButton{
 			IconName: strs.GetAddress("dashboard"),
@@ -51,14 +56,14 @@ func getCurrentUserActivityBarMainShortcuts() []*model.ShortcutButton {
 	}
 }
 
-func getCurrentUserActivityBarSpaceShortcuts() []*model.ShortcutButton {
+func getSessionUserActivityBarSpaceShortcuts() []*model.ShortcutButton {
 	return []*model.ShortcutButton{
 		&model.ShortcutButton{
 			IconName: strs.GetAddress("Marketing"),
 		},
 	}
 }
-func getCurrentUserActivityBarOtherShortcuts() []*model.ShortcutButton {
+func getSessionUserActivityBarOtherShortcuts() []*model.ShortcutButton {
 	return []*model.ShortcutButton{
 		&model.ShortcutButton{
 			IconName: strs.GetAddress("developer"),

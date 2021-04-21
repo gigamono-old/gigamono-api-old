@@ -1,3 +1,9 @@
+
+type WorkspaceIntegrations {
+  integrations: [Integration]!
+  builtins: [Integration]!
+}
+
 type Integration {
   name: String!
   id: String!
@@ -5,9 +11,4 @@ type Integration {
   avatar32URL: String
   hexColor: String
   spec: String
-}
-
-type UserIntegrations {
-  integrations: [Integration]!
-  builtins: [Integration]!
 }

@@ -11,12 +11,8 @@ import (
 	"github.com/sageflow/sageapi/internal/mockql/model"
 )
 
-func (r *queryResolver) GetCurrentUser(ctx context.Context, session *model.SessionTokensInput) (*model.User, error) {
-	return mockdata.GetCurrentUser(), nil
-}
-
-func (r *queryResolver) GetCurrentUserIntegrations(ctx context.Context, session *model.SessionTokensInput) (*model.UserIntegrations, error) {
-	return mockdata.GetCurrentUserIntegrations(), nil
+func (r *queryResolver) GetSessionUser(ctx context.Context, session *model.SessionTokensInput) (*model.SessionUser, error) {
+	return mockdata.GetSessionUser(), nil
 }
 
 // Query returns generated.QueryResolver implementation.

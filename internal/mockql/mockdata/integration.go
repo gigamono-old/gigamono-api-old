@@ -5,26 +5,11 @@ import (
 	"github.com/sageflow/sageflow/pkg/strs"
 )
 
-// GetCurrentUserIntegrations ...
-func GetCurrentUserIntegrations() *model.UserIntegrations {
-	return &model.UserIntegrations{
+func getWorkspaceIntegrations() *model.WorkspaceIntegrations {
+	return &model.WorkspaceIntegrations{
 		Integrations: getAllIntegrations(),
 		Builtins:     getBuiltinIntegrations(),
 	}
-}
-
-// GetIntegration ...
-func GetIntegration(id string) *model.Integration {
-	var foundIntegration *model.Integration
-
-	for _, val := range getAllIntegrations() {
-		if val.ID == id {
-			foundIntegration = val
-			break
-		}
-	}
-
-	return foundIntegration
 }
 
 func getAllIntegrations() []*model.Integration {

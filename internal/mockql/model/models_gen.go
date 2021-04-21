@@ -2,6 +2,19 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+
+	"github.com/99designs/gqlgen/graphql/introspection"
+)
+
+type Document struct {
+	ID            string  `json:"id" `
+	Name          string  `json:"name" `
+	Specification *string `json:"specification" `
+}
 type Integration struct {
 	Name        string  `json:"name" `
 	ID          string  `json:"id" `
@@ -15,10 +28,6 @@ type LayoutPreferences struct {
 	ActivityBarSpaceShortcuts []*ShortcutButton `json:"activityBarSpaceShortcuts" `
 	ActivityBarOtherShortcuts []*ShortcutButton `json:"activityBarOtherShortcuts" `
 }
-type NewUserInput struct {
-	Email    string `json:"email" `
-	Password string `json:"password" `
-}
 type Profile struct {
 	Username    string  `json:"username" `
 	Email       string  `json:"email" `
@@ -27,10 +36,8 @@ type Profile struct {
 	Avatar32url *string `json:"avatar32URL" `
 }
 type Project struct {
-	Name                  string      `json:"name" `
-	ID                    string      `json:"id" `
-	Workflows             []*Workflow `json:"workflows" `
-	SelectedWorkflowIndex int         `json:"selectedWorkflowIndex" `
+	Name string `json:"name" `
+	ID   string `json:"id" `
 }
 type SessionTokens struct {
 	AccessToken string `json:"accessToken" `
@@ -40,30 +47,207 @@ type SessionTokensInput struct {
 	AccessToken string `json:"accessToken" `
 	CsrfToken   string `json:"csrfToken" `
 }
+type SessionUser struct {
+	ID                            string                 `json:"id" `
+	Tokens                        *SessionTokens         `json:"tokens" `
+	Profile                       *Profile               `json:"profile" `
+	LayoutPreferences             *LayoutPreferences     `json:"layoutPreferences" `
+	Workspaces                    []*Workspace           `json:"workspaces" `
+	WorkspaceIndex                int                    `json:"workspaceIndex" `
+	WorkspaceProjects             []*Project             `json:"workspaceProjects" `
+	WorkspaceProjectIndex         int                    `json:"workspaceProjectIndex" `
+	WorkspaceProjectWorkflows     []*Workflow            `json:"workspaceProjectWorkflows" `
+	WorkspaceProjectWorkflowIndex int                    `json:"workspaceProjectWorkflowIndex" `
+	WorkspaceProjectDocuments     []*Document            `json:"workspaceProjectDocuments" `
+	WorkspaceProjectDocumentIndex int                    `json:"workspaceProjectDocumentIndex" `
+	WorkspaceIntegrations         *WorkspaceIntegrations `json:"workspaceIntegrations" `
+}
 type ShortcutButton struct {
 	IconName   *string `json:"iconName" `
 	EntityName *string `json:"entityName" `
 	Route      *string `json:"route" `
 }
-type User struct {
-	ID                     string             `json:"id" `
-	Tokens                 *SessionTokens     `json:"tokens" `
-	Profile                *Profile           `json:"profile" `
-	LayoutPreferences      *LayoutPreferences `json:"layoutPreferences" `
-	Workspaces             []*Workspace       `json:"workspaces" `
-	SelectedWorkspaceIndex int                `json:"selectedWorkspaceIndex" `
-	Projects               []*Project         `json:"projects" `
-	SelectedProjectIndex   int                `json:"selectedProjectIndex" `
+type Workflow struct {
+	Name          string  `json:"name" `
+	ID            string  `json:"id" `
+	Specification *string `json:"specification" `
 }
-type UserIntegrations struct {
+type Workspace struct {
+	ID          string  `json:"id" `
+	Name        string  `json:"name" `
+	Avatar32url *string `json:"avatar32URL" `
+}
+type WorkspaceIntegrations struct {
 	Integrations []*Integration `json:"integrations" `
 	Builtins     []*Integration `json:"builtins" `
 }
-type Workflow struct {
-	Name string `json:"name" `
-	ID   string `json:"id" `
+type Directive struct {
+	Name        string                      `json:"name" `
+	Description *string                     `json:"description" `
+	Locations   []string                    `json:"locations" `
+	Args        []*introspection.InputValue `json:"args" `
 }
-type Workspace struct {
-	Name        string  `json:"name" `
-	Avatar32url *string `json:"avatar32URL" `
+type EnumValue struct {
+	Name              string  `json:"name" `
+	Description       *string `json:"description" `
+	IsDeprecated      bool    `json:"isDeprecated" `
+	DeprecationReason *string `json:"deprecationReason" `
+}
+type Field struct {
+	Name              string                      `json:"name" `
+	Description       *string                     `json:"description" `
+	Args              []*introspection.InputValue `json:"args" `
+	Type              *introspection.Type         `json:"type" `
+	IsDeprecated      bool                        `json:"isDeprecated" `
+	DeprecationReason *string                     `json:"deprecationReason" `
+}
+type InputValue struct {
+	Name         string              `json:"name" `
+	Description  *string             `json:"description" `
+	Type         *introspection.Type `json:"type" `
+	DefaultValue *string             `json:"defaultValue" `
+}
+type Schema struct {
+	Types            []*introspection.Type      `json:"types" `
+	QueryType        *introspection.Type        `json:"queryType" `
+	MutationType     *introspection.Type        `json:"mutationType" `
+	SubscriptionType *introspection.Type        `json:"subscriptionType" `
+	Directives       []*introspection.Directive `json:"directives" `
+}
+type Type struct {
+	Kind          string                      `json:"kind" `
+	Name          *string                     `json:"name" `
+	Description   *string                     `json:"description" `
+	Fields        []*introspection.Field      `json:"fields" `
+	Interfaces    []*introspection.Type       `json:"interfaces" `
+	PossibleTypes []*introspection.Type       `json:"possibleTypes" `
+	EnumValues    []*introspection.EnumValue  `json:"enumValues" `
+	InputFields   []*introspection.InputValue `json:"inputFields" `
+	OfType        *introspection.Type         `json:"ofType" `
+}
+
+type DirectiveLocation string
+
+const (
+	DirectiveLocationQuery                DirectiveLocation = "QUERY"
+	DirectiveLocationMutation             DirectiveLocation = "MUTATION"
+	DirectiveLocationSubscription         DirectiveLocation = "SUBSCRIPTION"
+	DirectiveLocationField                DirectiveLocation = "FIELD"
+	DirectiveLocationFragmentDefinition   DirectiveLocation = "FRAGMENT_DEFINITION"
+	DirectiveLocationFragmentSpread       DirectiveLocation = "FRAGMENT_SPREAD"
+	DirectiveLocationInlineFragment       DirectiveLocation = "INLINE_FRAGMENT"
+	DirectiveLocationSchema               DirectiveLocation = "SCHEMA"
+	DirectiveLocationScalar               DirectiveLocation = "SCALAR"
+	DirectiveLocationObject               DirectiveLocation = "OBJECT"
+	DirectiveLocationFieldDefinition      DirectiveLocation = "FIELD_DEFINITION"
+	DirectiveLocationArgumentDefinition   DirectiveLocation = "ARGUMENT_DEFINITION"
+	DirectiveLocationInterface            DirectiveLocation = "INTERFACE"
+	DirectiveLocationUnion                DirectiveLocation = "UNION"
+	DirectiveLocationEnum                 DirectiveLocation = "ENUM"
+	DirectiveLocationEnumValue            DirectiveLocation = "ENUM_VALUE"
+	DirectiveLocationInputObject          DirectiveLocation = "INPUT_OBJECT"
+	DirectiveLocationInputFieldDefinition DirectiveLocation = "INPUT_FIELD_DEFINITION"
+)
+
+var AllDirectiveLocation = []DirectiveLocation{
+	DirectiveLocationQuery,
+	DirectiveLocationMutation,
+	DirectiveLocationSubscription,
+	DirectiveLocationField,
+	DirectiveLocationFragmentDefinition,
+	DirectiveLocationFragmentSpread,
+	DirectiveLocationInlineFragment,
+	DirectiveLocationSchema,
+	DirectiveLocationScalar,
+	DirectiveLocationObject,
+	DirectiveLocationFieldDefinition,
+	DirectiveLocationArgumentDefinition,
+	DirectiveLocationInterface,
+	DirectiveLocationUnion,
+	DirectiveLocationEnum,
+	DirectiveLocationEnumValue,
+	DirectiveLocationInputObject,
+	DirectiveLocationInputFieldDefinition,
+}
+
+func (e DirectiveLocation) IsValid() bool {
+	switch e {
+	case DirectiveLocationQuery, DirectiveLocationMutation, DirectiveLocationSubscription, DirectiveLocationField, DirectiveLocationFragmentDefinition, DirectiveLocationFragmentSpread, DirectiveLocationInlineFragment, DirectiveLocationSchema, DirectiveLocationScalar, DirectiveLocationObject, DirectiveLocationFieldDefinition, DirectiveLocationArgumentDefinition, DirectiveLocationInterface, DirectiveLocationUnion, DirectiveLocationEnum, DirectiveLocationEnumValue, DirectiveLocationInputObject, DirectiveLocationInputFieldDefinition:
+		return true
+	}
+	return false
+}
+
+func (e DirectiveLocation) String() string {
+	return string(e)
+}
+
+func (e *DirectiveLocation) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DirectiveLocation(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid __DirectiveLocation", str)
+	}
+	return nil
+}
+
+func (e DirectiveLocation) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TypeKind string
+
+const (
+	TypeKindScalar      TypeKind = "SCALAR"
+	TypeKindObject      TypeKind = "OBJECT"
+	TypeKindInterface   TypeKind = "INTERFACE"
+	TypeKindUnion       TypeKind = "UNION"
+	TypeKindEnum        TypeKind = "ENUM"
+	TypeKindInputObject TypeKind = "INPUT_OBJECT"
+	TypeKindList        TypeKind = "LIST"
+	TypeKindNonNull     TypeKind = "NON_NULL"
+)
+
+var AllTypeKind = []TypeKind{
+	TypeKindScalar,
+	TypeKindObject,
+	TypeKindInterface,
+	TypeKindUnion,
+	TypeKindEnum,
+	TypeKindInputObject,
+	TypeKindList,
+	TypeKindNonNull,
+}
+
+func (e TypeKind) IsValid() bool {
+	switch e {
+	case TypeKindScalar, TypeKindObject, TypeKindInterface, TypeKindUnion, TypeKindEnum, TypeKindInputObject, TypeKindList, TypeKindNonNull:
+		return true
+	}
+	return false
+}
+
+func (e TypeKind) String() string {
+	return string(e)
+}
+
+func (e *TypeKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TypeKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid __TypeKind", str)
+	}
+	return nil
+}
+
+func (e TypeKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

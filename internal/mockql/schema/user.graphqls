@@ -1,15 +1,22 @@
-type User {
+type SessionUser {
+  # session user specific stuff
   id: String!
   tokens: SessionTokens
   profile: Profile!
   layoutPreferences: LayoutPreferences
-  workspaces: [Workspace]!
-  selectedWorkspaceIndex: Int!
-  projects: [Project]!
-  selectedProjectIndex: Int!
-}
 
-input NewUserInput {
-  email: String!
-  password: String!
+  # workspace specific stuff
+  workspaces: [Workspace]!
+  workspaceIndex: Int!
+
+  workspaceProjects: [Project]!
+  workspaceProjectIndex: Int!
+
+  workspaceProjectWorkflows: [Workflow]!
+  workspaceProjectWorkflowIndex: Int!
+
+  workspaceProjectDocuments: [Document]!
+  workspaceProjectDocumentIndex: Int!
+
+  workspaceIntegrations: WorkspaceIntegrations!
 }
