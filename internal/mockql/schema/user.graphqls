@@ -1,54 +1,15 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-# User
 type User {
   id: String!
   tokens: SessionTokens
   profile: Profile!
   layoutPreferences: LayoutPreferences
+  workspaces: [Workspace]!
+  selectedWorkspaceIndex: Int!
+  projects: [Project]!
+  selectedProjectIndex: Int!
 }
 
-# Profile
-type Profile {
-  username: String!
-  email: String!
-  firstName: String
-  lastName: String
-}
-
-# Layout
-type LayoutPreferences {
-  activityBarMainShortcuts: [Button]
-  activityBarSpaceShortcuts: [Button]
-  activityBarOtherShortcuts: [Button]
-}
-
-type Button {
-  name: String # The id for identifying the button
-  label: String # The label on the button
-  iconURL: String # The icon on the button
-  initials: String # The
-}
-
-# Tokens
-type SessionTokens {
-  accessToken: String!
-  csrfToken: String!
-}
-
-# New User
 input NewUserInput {
   email: String!
   password: String!
-}
-
-type Query {
-  getUsers: [User]!
-  getCurrentUser: User
-}
-
-type Mutation {
-  createUser(user: NewUserInput!): User
 }

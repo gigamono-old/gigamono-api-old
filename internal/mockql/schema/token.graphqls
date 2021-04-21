@@ -1,0 +1,9 @@
+type SessionTokens {
+  accessToken: String!
+  csrfToken: String!
+}
+
+input SessionTokensInput {
+  accessToken: String!
+  csrfToken: String!
+}

@@ -2,34 +2,68 @@
 
 package model
 
-type Button struct {
-	Name     *string `json:"name" `
-	Label    *string `json:"label" `
-	IconURL  *string `json:"iconURL" `
-	Initials *string `json:"initials" `
+type Integration struct {
+	Name        string  `json:"name" `
+	ID          string  `json:"id" `
+	Description string  `json:"description" `
+	Avatar32url *string `json:"avatar32URL" `
+	HexColor    *string `json:"hexColor" `
+	Spec        *string `json:"spec" `
 }
 type LayoutPreferences struct {
-	ActivityBarMainShortcuts  []*Button `json:"activityBarMainShortcuts" `
-	ActivityBarSpaceShortcuts []*Button `json:"activityBarSpaceShortcuts" `
-	ActivityBarOtherShortcuts []*Button `json:"activityBarOtherShortcuts" `
+	ActivityBarMainShortcuts  []*ShortcutButton `json:"activityBarMainShortcuts" `
+	ActivityBarSpaceShortcuts []*ShortcutButton `json:"activityBarSpaceShortcuts" `
+	ActivityBarOtherShortcuts []*ShortcutButton `json:"activityBarOtherShortcuts" `
 }
 type NewUserInput struct {
 	Email    string `json:"email" `
 	Password string `json:"password" `
 }
 type Profile struct {
-	Username  string  `json:"username" `
-	Email     string  `json:"email" `
-	FirstName *string `json:"firstName" `
-	LastName  *string `json:"lastName" `
+	Username    string  `json:"username" `
+	Email       string  `json:"email" `
+	FirstName   *string `json:"firstName" `
+	LastName    *string `json:"lastName" `
+	Avatar32url *string `json:"avatar32URL" `
+}
+type Project struct {
+	Name                  string      `json:"name" `
+	ID                    string      `json:"id" `
+	Workflows             []*Workflow `json:"workflows" `
+	SelectedWorkflowIndex int         `json:"selectedWorkflowIndex" `
 }
 type SessionTokens struct {
 	AccessToken string `json:"accessToken" `
 	CsrfToken   string `json:"csrfToken" `
 }
+type SessionTokensInput struct {
+	AccessToken string `json:"accessToken" `
+	CsrfToken   string `json:"csrfToken" `
+}
+type ShortcutButton struct {
+	IconName   *string `json:"iconName" `
+	EntityName *string `json:"entityName" `
+	Route      *string `json:"route" `
+}
 type User struct {
-	ID                string             `json:"id" `
-	Tokens            *SessionTokens     `json:"tokens" `
-	Profile           *Profile           `json:"profile" `
-	LayoutPreferences *LayoutPreferences `json:"layoutPreferences" `
+	ID                     string             `json:"id" `
+	Tokens                 *SessionTokens     `json:"tokens" `
+	Profile                *Profile           `json:"profile" `
+	LayoutPreferences      *LayoutPreferences `json:"layoutPreferences" `
+	Workspaces             []*Workspace       `json:"workspaces" `
+	SelectedWorkspaceIndex int                `json:"selectedWorkspaceIndex" `
+	Projects               []*Project         `json:"projects" `
+	SelectedProjectIndex   int                `json:"selectedProjectIndex" `
+}
+type UserIntegrations struct {
+	Integrations []*Integration `json:"integrations" `
+	Builtins     []*Integration `json:"builtins" `
+}
+type Workflow struct {
+	Name string `json:"name" `
+	ID   string `json:"id" `
+}
+type Workspace struct {
+	Name        string  `json:"name" `
+	Avatar32url *string `json:"avatar32URL" `
 }

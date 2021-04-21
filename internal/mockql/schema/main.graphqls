@@ -1,0 +1,4 @@
+type Query {
+  getCurrentUser(session: SessionTokensInput): User
+  getCurrentUserIntegrations(session: SessionTokensInput): UserIntegrations
+}

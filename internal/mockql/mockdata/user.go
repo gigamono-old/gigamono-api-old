@@ -8,52 +8,65 @@ import (
 // GetCurrentUser ...
 func GetCurrentUser() *model.User {
 	return &model.User{
-		ID:                "4e6c8b75-4a74-42fd-84b3-f319a8f153c6",
-		LayoutPreferences: getCurrentUserPreferencesLayout(),
+		ID:                     "4e6c8b75-4a74-42fd-84b3-f319a8f153c6",
+		Profile:                getCurrentUserProfile(),
+		LayoutPreferences:      getCurrentUserPreferencesLayout(),
+		Workspaces:             getCurrentUserWorkspaces(),
+		SelectedWorkspaceIndex: 0,
+		Projects:               getCurrentUserProjectsBasic(),
+		SelectedProjectIndex:   0,
 	}
 }
 
 func getCurrentUserPreferencesLayout() *model.LayoutPreferences {
 	return &model.LayoutPreferences{
-		ActivityBarMainShortcuts: getCurrentUserActivityBarMainShortcuts(),
+		ActivityBarMainShortcuts:  getCurrentUserActivityBarMainShortcuts(),
 		ActivityBarSpaceShortcuts: getCurrentUserActivityBarSpaceShortcuts(),
 		ActivityBarOtherShortcuts: getCurrentUserActivityBarOtherShortcuts(),
 	}
 }
 
-func getCurrentUserActivityBarMainShortcuts() []*model.Button {
-	return []*model.Button{
-		&model.Button{
-			Name: strs.GetAddress("Dashboard"),
+func getCurrentUserActivityBarMainShortcuts() []*model.ShortcutButton {
+	return []*model.ShortcutButton{
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("dashboard"),
+			Route:    strs.GetAddress("dashboard"),
 		},
-		&model.Button{
-			Name: strs.GetAddress("Design"),
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("design"),
+			Route:    strs.GetAddress("design"),
 		},
-		&model.Button{
-			Name: strs.GetAddress("Workflow"),
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("workflows"),
+			Route:    strs.GetAddress("workflows"),
 		},
-		&model.Button{
-			Name: strs.GetAddress("Documents"),
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("documents-2"),
+			Route:    strs.GetAddress("documents"),
 		},
-		&model.Button{
-			Name: strs.GetAddress("Extensions"),
-		},
-	}
-}
-func getCurrentUserActivityBarSpaceShortcuts() []*model.Button {
-	return []*model.Button{
-		&model.Button{
-			Name: strs.GetAddress("Marketing"),
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("extensions-2"),
+			Route:    strs.GetAddress("extensions"),
 		},
 	}
 }
-func getCurrentUserActivityBarOtherShortcuts() []*model.Button {
-	return []*model.Button{
-		&model.Button{
-			Name: strs.GetAddress("Developer"),
+
+func getCurrentUserActivityBarSpaceShortcuts() []*model.ShortcutButton {
+	return []*model.ShortcutButton{
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("Marketing"),
 		},
-		&model.Button{
-			Name: strs.GetAddress("Settings"),
+	}
+}
+func getCurrentUserActivityBarOtherShortcuts() []*model.ShortcutButton {
+	return []*model.ShortcutButton{
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("developer"),
+			Route:    strs.GetAddress("developer"),
+		},
+		&model.ShortcutButton{
+			IconName: strs.GetAddress("settings"),
+			Route:    strs.GetAddress("settings"),
 		},
 	}
 }

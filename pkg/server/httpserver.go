@@ -23,8 +23,9 @@ func (server *APIServer) setRoutes() {
 	graphqlHandler := mockql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
 	playgroundHandler := mockql.PlaygroundHandler()
 
-	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true))) // Serves files in ../sageflow-ui/dist.
-	server.POST("/graphql", graphqlHandler)                                 // Handles all graphql requests.
-	server.GET("/graphql", graphqlHandler)                                  // Handles query-only graphql requests.
-	server.GET("/playground", playgroundHandler)                            // Shows playground UI.
+	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.
+	server.Use(static.Serve("/avatars", static.LocalFile("./avatars", true))) // Serves avatar images.
+	server.POST("/graphql", graphqlHandler)                                   // Handles all graphql requests.
+	server.GET("/graphql", graphqlHandler)                                    // Handles query-only graphql requests.
+	server.GET("/playground", playgroundHandler)                              // Shows playground UI.
 }

@@ -1,0 +1,13 @@
+type Integration {
+  name: String!
+  id: String!
+  description: String!
+  avatar32URL: String
+  hexColor: String
+  spec: String
+}
+
+type UserIntegrations {
+  integrations: [Integration]!
+  builtins: [Integration]!
+}

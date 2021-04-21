@@ -1,0 +1,11 @@
+type Project {
+    name: String!
+    id: String!
+    workflows: [Workflow]!
+    selectedWorkflowIndex: Int!
+}
+
+type Workflow {
+    name: String!
+    id: String!
+}

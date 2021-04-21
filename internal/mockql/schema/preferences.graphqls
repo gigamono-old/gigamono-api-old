@@ -1,0 +1,11 @@
+type LayoutPreferences {
+  activityBarMainShortcuts: [ShortcutButton]
+  activityBarSpaceShortcuts: [ShortcutButton]
+  activityBarOtherShortcuts: [ShortcutButton]
+}
+
+type ShortcutButton {
+  iconName: String # The icon type to be used to represent button.
+  entityName: String # The name of the entity the button represents.
+  route: String # The route this button links to.
+}

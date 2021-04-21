@@ -1,0 +1,4 @@
+type Workspace {
+  name: String!
+  avatar32URL: String
+}

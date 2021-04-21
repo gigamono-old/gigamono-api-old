@@ -5,30 +5,21 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/sageflow/sageapi/internal/mockql/generated"
 	"github.com/sageflow/sageapi/internal/mockql/mockdata"
 	"github.com/sageflow/sageapi/internal/mockql/model"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, user model.NewUserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) GetUsers(ctx context.Context) ([]*model.User, error) {
-	return []*model.User{}, nil
-}
-
-func (r *queryResolver) GetCurrentUser(ctx context.Context) (*model.User, error) {
+func (r *queryResolver) GetCurrentUser(ctx context.Context, session *model.SessionTokensInput) (*model.User, error) {
 	return mockdata.GetCurrentUser(), nil
 }
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+func (r *queryResolver) GetCurrentUserIntegrations(ctx context.Context, session *model.SessionTokensInput) (*model.UserIntegrations, error) {
+	return mockdata.GetCurrentUserIntegrations(), nil
+}
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
