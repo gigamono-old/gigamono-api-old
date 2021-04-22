@@ -1,6 +1,6 @@
 type LayoutPreferences {
   activityBarMainShortcuts: [ShortcutButton]
-  activityBarSpaceShortcuts: [ShortcutButton]
+  activityBarWorkspaceShortcuts: [ShortcutButton]
   activityBarOtherShortcuts: [ShortcutButton]
 }
 

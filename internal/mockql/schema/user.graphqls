@@ -1,22 +1,10 @@
-type SessionUser {
-  # session user specific stuff
+interface IUser {
   id: String!
-  tokens: SessionTokens
   profile: Profile!
-  layoutPreferences: LayoutPreferences
+}
 
-  # workspace specific stuff
-  workspaces: [Workspace]!
-  workspaceIndex: Int!
-
-  workspaceProjects: [Project]!
-  workspaceProjectIndex: Int!
-
-  workspaceProjectWorkflows: [Workflow]!
-  workspaceProjectWorkflowIndex: Int!
-
-  workspaceProjectDocuments: [Document]!
-  workspaceProjectDocumentIndex: Int!
-
-  workspaceIntegrations: WorkspaceIntegrations!
+type SessionUser implements IUser {
+  id: String!
+  profile: Profile!
+  session: Session!
 }

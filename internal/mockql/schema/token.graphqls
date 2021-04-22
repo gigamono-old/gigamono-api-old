@@ -1,4 +1,9 @@
-type SessionTokens {
+interface ITokens {
+  accessToken: String!
+  csrfToken: String!
+}
+
+type SessionTokens implements ITokens {
   accessToken: String!
   csrfToken: String!
 }

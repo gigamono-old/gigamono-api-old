@@ -1,14 +1,29 @@
-
-type WorkspaceIntegrations {
-  integrations: [Integration]!
-  builtins: [Integration]!
-}
-
-type Integration {
+interface IIntegration {
   name: String!
   id: String!
   description: String!
   avatar32URL: String
   hexColor: String
-  spec: String
+}
+
+type Integration implements IIntegration {
+  name: String!
+  id: String!
+  description: String!
+  avatar32URL: String
+  hexColor: String
+  specification: String
+}
+
+type SessionIntegration implements IIntegration {
+  name: String!
+  id: String!
+  description: String!
+  avatar32URL: String
+  hexColor: String
+}
+
+type SessionIntegrations {
+  integrations: [SessionIntegration]!
+  builtins: [SessionIntegration]!
 }

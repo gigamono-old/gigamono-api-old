@@ -10,23 +10,57 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
+type IDocument interface {
+	IsIDocument()
+}
+
+type IIntegration interface {
+	IsIIntegration()
+}
+
+type IProject interface {
+	IsIProject()
+}
+
+type ITokens interface {
+	IsITokens()
+}
+
+type IUser interface {
+	IsIUser()
+}
+
+type IWorkflow interface {
+	IsIWorkflow()
+}
+
+type IWorkspace interface {
+	IsIWorkspace()
+}
+
 type Document struct {
 	ID            string  `json:"id" `
 	Name          string  `json:"name" `
 	Specification *string `json:"specification" `
 }
+
+func (Document) IsIDocument() {}
+
 type Integration struct {
-	Name        string  `json:"name" `
-	ID          string  `json:"id" `
-	Description string  `json:"description" `
-	Avatar32url *string `json:"avatar32URL" `
-	HexColor    *string `json:"hexColor" `
-	Spec        *string `json:"spec" `
+	Name          string  `json:"name" `
+	ID            string  `json:"id" `
+	Description   string  `json:"description" `
+	Avatar32url   *string `json:"avatar32URL" `
+	HexColor      *string `json:"hexColor" `
+	Specification *string `json:"specification" `
 }
+
+func (Integration) IsIIntegration() {}
+
 type LayoutPreferences struct {
-	ActivityBarMainShortcuts  []*ShortcutButton `json:"activityBarMainShortcuts" `
-	ActivityBarSpaceShortcuts []*ShortcutButton `json:"activityBarSpaceShortcuts" `
-	ActivityBarOtherShortcuts []*ShortcutButton `json:"activityBarOtherShortcuts" `
+	ActivityBarMainShortcuts      []*ShortcutButton `json:"activityBarMainShortcuts" `
+	ActivityBarWorkspaceShortcuts []*ShortcutButton `json:"activityBarWorkspaceShortcuts" `
+	ActivityBarOtherShortcuts     []*ShortcutButton `json:"activityBarOtherShortcuts" `
 }
 type Profile struct {
 	Username    string  `json:"username" `
@@ -35,33 +69,84 @@ type Profile struct {
 	LastName    *string `json:"lastName" `
 	Avatar32url *string `json:"avatar32URL" `
 }
-type Project struct {
-	Name string `json:"name" `
-	ID   string `json:"id" `
+type Session struct {
+	Tokens              *SessionTokens       `json:"tokens" `
+	LayoutPreferences   *LayoutPreferences   `json:"layoutPreferences" `
+	FocusWorkspaceIndex int                  `json:"focusWorkspaceIndex" `
+	Workspaces          []*SessionWorkspace  `json:"workspaces" `
+	Integrations        *SessionIntegrations `json:"integrations" `
 }
+type SessionDocument struct {
+	ID   string `json:"id" `
+	Name string `json:"name" `
+}
+
+func (SessionDocument) IsIDocument() {}
+
+type SessionInput struct {
+	Tokens *SessionTokensInput `json:"tokens" `
+}
+type SessionIntegration struct {
+	Name        string  `json:"name" `
+	ID          string  `json:"id" `
+	Description string  `json:"description" `
+	Avatar32url *string `json:"avatar32URL" `
+	HexColor    *string `json:"hexColor" `
+}
+
+func (SessionIntegration) IsIIntegration() {}
+
+type SessionIntegrations struct {
+	Integrations []*SessionIntegration `json:"integrations" `
+	Builtins     []*SessionIntegration `json:"builtins" `
+}
+type SessionProject struct {
+	Name               string             `json:"name" `
+	ID                 string             `json:"id" `
+	FocusWorkflowIndex int                `json:"focusWorkflowIndex" `
+	Workflows          []*SessionWorkflow `json:"workflows" `
+	FocusDocumentIndex int                `json:"focusDocumentIndex" `
+	Documents          []*SessionDocument `json:"documents" `
+}
+
+func (SessionProject) IsIProject() {}
+
 type SessionTokens struct {
 	AccessToken string `json:"accessToken" `
 	CsrfToken   string `json:"csrfToken" `
 }
+
+func (SessionTokens) IsITokens() {}
+
 type SessionTokensInput struct {
 	AccessToken string `json:"accessToken" `
 	CsrfToken   string `json:"csrfToken" `
 }
 type SessionUser struct {
-	ID                            string                 `json:"id" `
-	Tokens                        *SessionTokens         `json:"tokens" `
-	Profile                       *Profile               `json:"profile" `
-	LayoutPreferences             *LayoutPreferences     `json:"layoutPreferences" `
-	Workspaces                    []*Workspace           `json:"workspaces" `
-	WorkspaceIndex                int                    `json:"workspaceIndex" `
-	WorkspaceProjects             []*Project             `json:"workspaceProjects" `
-	WorkspaceProjectIndex         int                    `json:"workspaceProjectIndex" `
-	WorkspaceProjectWorkflows     []*Workflow            `json:"workspaceProjectWorkflows" `
-	WorkspaceProjectWorkflowIndex int                    `json:"workspaceProjectWorkflowIndex" `
-	WorkspaceProjectDocuments     []*Document            `json:"workspaceProjectDocuments" `
-	WorkspaceProjectDocumentIndex int                    `json:"workspaceProjectDocumentIndex" `
-	WorkspaceIntegrations         *WorkspaceIntegrations `json:"workspaceIntegrations" `
+	ID      string   `json:"id" `
+	Profile *Profile `json:"profile" `
+	Session *Session `json:"session" `
 }
+
+func (SessionUser) IsIUser() {}
+
+type SessionWorkflow struct {
+	Name string `json:"name" `
+	ID   string `json:"id" `
+}
+
+func (SessionWorkflow) IsIWorkflow() {}
+
+type SessionWorkspace struct {
+	ID                string            `json:"id" `
+	Name              string            `json:"name" `
+	Avatar32url       *string           `json:"avatar32URL" `
+	FocusProjectIndex int               `json:"focusProjectIndex" `
+	Projects          []*SessionProject `json:"projects" `
+}
+
+func (SessionWorkspace) IsIWorkspace() {}
+
 type ShortcutButton struct {
 	IconName   *string `json:"iconName" `
 	EntityName *string `json:"entityName" `
@@ -72,15 +157,9 @@ type Workflow struct {
 	ID            string  `json:"id" `
 	Specification *string `json:"specification" `
 }
-type Workspace struct {
-	ID          string  `json:"id" `
-	Name        string  `json:"name" `
-	Avatar32url *string `json:"avatar32URL" `
-}
-type WorkspaceIntegrations struct {
-	Integrations []*Integration `json:"integrations" `
-	Builtins     []*Integration `json:"builtins" `
-}
+
+func (Workflow) IsIWorkflow() {}
+
 type Directive struct {
 	Name        string                      `json:"name" `
 	Description *string                     `json:"description" `

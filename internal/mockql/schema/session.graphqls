@@ -1,0 +1,11 @@
+type Session {
+  tokens: SessionTokens
+  layoutPreferences: LayoutPreferences!
+  focusWorkspaceIndex: Int!
+  workspaces: [SessionWorkspace]!
+  integrations: SessionIntegrations
+}
+
+input SessionInput {
+  tokens: SessionTokensInput
+}
