@@ -1,16 +1,8 @@
-interface IProject {
+type Project {
     name: String!
     id: String!
+    documents: [Document]!
+    workflows: [Workflow]!
 }
 
-type SessionProject implements IProject {
-    name: String!
-    id: String!
-
-    focusWorkflowIndex: Int!
-    workflows: [SessionWorkflow]!
-
-    focusDocumentIndex: Int!
-    documents: [SessionDocument]!
-}
 

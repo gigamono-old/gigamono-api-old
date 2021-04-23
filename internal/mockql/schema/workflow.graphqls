@@ -1,15 +1,5 @@
-interface IWorkflow {
-    name: String!
-    id: String!
-}
-
-type Workflow implements IWorkflow {
-    name: String!
-    id: String!
-    specification: String
-}
-
-type SessionWorkflow implements IWorkflow {
-    name: String!
-    id: String!
+type Workflow {
+  name: String!
+  id: String!
+  specification: String
 }

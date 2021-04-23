@@ -1,15 +1,5 @@
-interface IDocument {
-  id: String!
-  name: String!
-}
-
-type Document implements IDocument {
+type Document {
   id: String!
   name: String!
   specification: String
-}
-
-type SessionDocument implements IDocument {
-  id: String!
-  name: String!
 }

@@ -1,11 +1,20 @@
 type Session {
-  tokens: SessionTokens
-  layoutPreferences: LayoutPreferences!
+  tokens: Tokens
+  layout: LayoutPreferences!
   focusWorkspaceIndex: Int!
-  workspaces: [SessionWorkspace]!
-  integrations: SessionIntegrations
+  workspaceFocusIndices: [WorkspaceFocus]!
+}
+
+type WorkspaceFocus {
+  focusProjectIndex: Int!
+  projectFocusIndices: [ProjectFocus]!
+}
+
+type ProjectFocus {
+  focusWorkflowIndex: Int!
+  focusDocumentIndex: Int!
 }
 
 input SessionInput {
-  tokens: SessionTokensInput
+  tokens: TokensInput
 }

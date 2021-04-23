@@ -1,14 +1,9 @@
-interface ITokens {
+type Tokens {
   accessToken: String!
   csrfToken: String!
 }
 
-type SessionTokens implements ITokens {
-  accessToken: String!
-  csrfToken: String!
-}
-
-input SessionTokensInput {
+input TokensInput {
   accessToken: String!
   csrfToken: String!
 }

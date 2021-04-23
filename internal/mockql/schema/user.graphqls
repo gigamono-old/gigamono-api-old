@@ -1,10 +1,6 @@
-interface IUser {
+type User {
   id: String!
   profile: Profile!
-}
-
-type SessionUser implements IUser {
-  id: String!
-  profile: Profile!
-  session: Session!
+  session: Session
+  workspaces: [Workspace]
 }

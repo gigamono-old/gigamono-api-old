@@ -5,7 +5,7 @@ import (
 	"github.com/sageflow/sageflow/pkg/strs"
 )
 
-func getSessionUserProfile() *model.Profile {
+func getUserProfile() *model.Profile {
 	return &model.Profile{
 		Username:    "nypro",
 		Email:       "smartnypro@gmail.com",

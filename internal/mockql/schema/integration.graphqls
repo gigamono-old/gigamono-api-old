@@ -1,12 +1,4 @@
-interface IIntegration {
-  name: String!
-  id: String!
-  description: String!
-  avatar32URL: String
-  hexColor: String
-}
-
-type Integration implements IIntegration {
+type Integration {
   name: String!
   id: String!
   description: String!
@@ -15,15 +7,7 @@ type Integration implements IIntegration {
   specification: String
 }
 
-type SessionIntegration implements IIntegration {
-  name: String!
-  id: String!
-  description: String!
-  avatar32URL: String
-  hexColor: String
-}
-
-type SessionIntegrations {
-  integrations: [SessionIntegration]!
-  builtins: [SessionIntegration]!
+type Integrations {
+  apps: [Integration]!
+  builtins: [Integration]!
 }

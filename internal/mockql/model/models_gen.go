@@ -10,42 +10,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
-type IDocument interface {
-	IsIDocument()
-}
-
-type IIntegration interface {
-	IsIIntegration()
-}
-
-type IProject interface {
-	IsIProject()
-}
-
-type ITokens interface {
-	IsITokens()
-}
-
-type IUser interface {
-	IsIUser()
-}
-
-type IWorkflow interface {
-	IsIWorkflow()
-}
-
-type IWorkspace interface {
-	IsIWorkspace()
-}
-
 type Document struct {
 	ID            string  `json:"id" `
 	Name          string  `json:"name" `
 	Specification *string `json:"specification" `
 }
-
-func (Document) IsIDocument() {}
-
 type Integration struct {
 	Name          string  `json:"name" `
 	ID            string  `json:"id" `
@@ -54,9 +23,10 @@ type Integration struct {
 	HexColor      *string `json:"hexColor" `
 	Specification *string `json:"specification" `
 }
-
-func (Integration) IsIIntegration() {}
-
+type Integrations struct {
+	Apps     []*Integration `json:"apps" `
+	Builtins []*Integration `json:"builtins" `
+}
 type LayoutPreferences struct {
 	ActivityBarMainShortcuts      []*ShortcutButton `json:"activityBarMainShortcuts" `
 	ActivityBarWorkspaceShortcuts []*ShortcutButton `json:"activityBarWorkspaceShortcuts" `
@@ -69,97 +39,60 @@ type Profile struct {
 	LastName    *string `json:"lastName" `
 	Avatar32url *string `json:"avatar32URL" `
 }
+type Project struct {
+	Name      string      `json:"name" `
+	ID        string      `json:"id" `
+	Documents []*Document `json:"documents" `
+	Workflows []*Workflow `json:"workflows" `
+}
+type ProjectFocus struct {
+	FocusWorkflowIndex int `json:"focusWorkflowIndex" `
+	FocusDocumentIndex int `json:"focusDocumentIndex" `
+}
 type Session struct {
-	Tokens              *SessionTokens       `json:"tokens" `
-	LayoutPreferences   *LayoutPreferences   `json:"layoutPreferences" `
-	FocusWorkspaceIndex int                  `json:"focusWorkspaceIndex" `
-	Workspaces          []*SessionWorkspace  `json:"workspaces" `
-	Integrations        *SessionIntegrations `json:"integrations" `
+	Tokens                *Tokens            `json:"tokens" `
+	Layout                *LayoutPreferences `json:"layout" `
+	FocusWorkspaceIndex   int                `json:"focusWorkspaceIndex" `
+	WorkspaceFocusIndices []*WorkspaceFocus  `json:"workspaceFocusIndices" `
 }
-type SessionDocument struct {
-	ID   string `json:"id" `
-	Name string `json:"name" `
-}
-
-func (SessionDocument) IsIDocument() {}
-
 type SessionInput struct {
-	Tokens *SessionTokensInput `json:"tokens" `
+	Tokens *TokensInput `json:"tokens" `
 }
-type SessionIntegration struct {
-	Name        string  `json:"name" `
-	ID          string  `json:"id" `
-	Description string  `json:"description" `
-	Avatar32url *string `json:"avatar32URL" `
-	HexColor    *string `json:"hexColor" `
-}
-
-func (SessionIntegration) IsIIntegration() {}
-
-type SessionIntegrations struct {
-	Integrations []*SessionIntegration `json:"integrations" `
-	Builtins     []*SessionIntegration `json:"builtins" `
-}
-type SessionProject struct {
-	Name               string             `json:"name" `
-	ID                 string             `json:"id" `
-	FocusWorkflowIndex int                `json:"focusWorkflowIndex" `
-	Workflows          []*SessionWorkflow `json:"workflows" `
-	FocusDocumentIndex int                `json:"focusDocumentIndex" `
-	Documents          []*SessionDocument `json:"documents" `
-}
-
-func (SessionProject) IsIProject() {}
-
-type SessionTokens struct {
-	AccessToken string `json:"accessToken" `
-	CsrfToken   string `json:"csrfToken" `
-}
-
-func (SessionTokens) IsITokens() {}
-
-type SessionTokensInput struct {
-	AccessToken string `json:"accessToken" `
-	CsrfToken   string `json:"csrfToken" `
-}
-type SessionUser struct {
-	ID      string   `json:"id" `
-	Profile *Profile `json:"profile" `
-	Session *Session `json:"session" `
-}
-
-func (SessionUser) IsIUser() {}
-
-type SessionWorkflow struct {
-	Name string `json:"name" `
-	ID   string `json:"id" `
-}
-
-func (SessionWorkflow) IsIWorkflow() {}
-
-type SessionWorkspace struct {
-	ID                string            `json:"id" `
-	Name              string            `json:"name" `
-	Avatar32url       *string           `json:"avatar32URL" `
-	FocusProjectIndex int               `json:"focusProjectIndex" `
-	Projects          []*SessionProject `json:"projects" `
-}
-
-func (SessionWorkspace) IsIWorkspace() {}
-
 type ShortcutButton struct {
 	IconName   *string `json:"iconName" `
 	EntityName *string `json:"entityName" `
 	Route      *string `json:"route" `
+}
+type Tokens struct {
+	AccessToken string `json:"accessToken" `
+	CsrfToken   string `json:"csrfToken" `
+}
+type TokensInput struct {
+	AccessToken string `json:"accessToken" `
+	CsrfToken   string `json:"csrfToken" `
+}
+type User struct {
+	ID         string       `json:"id" `
+	Profile    *Profile     `json:"profile" `
+	Session    *Session     `json:"session" `
+	Workspaces []*Workspace `json:"workspaces" `
 }
 type Workflow struct {
 	Name          string  `json:"name" `
 	ID            string  `json:"id" `
 	Specification *string `json:"specification" `
 }
-
-func (Workflow) IsIWorkflow() {}
-
+type Workspace struct {
+	ID           string          `json:"id" `
+	Name         string          `json:"name" `
+	Avatar32url  *string         `json:"avatar32URL" `
+	Projects     []*Project      `json:"projects" `
+	Integrations []*Integrations `json:"integrations" `
+}
+type WorkspaceFocus struct {
+	FocusProjectIndex   int             `json:"focusProjectIndex" `
+	ProjectFocusIndices []*ProjectFocus `json:"projectFocusIndices" `
+}
 type Directive struct {
 	Name        string                      `json:"name" `
 	Description *string                     `json:"description" `

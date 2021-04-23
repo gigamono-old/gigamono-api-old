@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 
@@ -57,6 +56,11 @@ type ComplexityRoot struct {
 		Specification func(childComplexity int) int
 	}
 
+	Integrations struct {
+		Apps     func(childComplexity int) int
+		Builtins func(childComplexity int) int
+	}
+
 	LayoutPreferences struct {
 		ActivityBarMainShortcuts      func(childComplexity int) int
 		ActivityBarOtherShortcuts     func(childComplexity int) int
@@ -71,67 +75,27 @@ type ComplexityRoot struct {
 		Username    func(childComplexity int) int
 	}
 
+	Project struct {
+		Documents func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Workflows func(childComplexity int) int
+	}
+
+	ProjectFocus struct {
+		FocusDocumentIndex func(childComplexity int) int
+		FocusWorkflowIndex func(childComplexity int) int
+	}
+
 	Query struct {
 		GetSessionUser func(childComplexity int, session *model.SessionInput) int
 	}
 
 	Session struct {
-		FocusWorkspaceIndex func(childComplexity int) int
-		Integrations        func(childComplexity int) int
-		LayoutPreferences   func(childComplexity int) int
-		Tokens              func(childComplexity int) int
-		Workspaces          func(childComplexity int) int
-	}
-
-	SessionDocument struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-	}
-
-	SessionIntegration struct {
-		Avatar32url func(childComplexity int) int
-		Description func(childComplexity int) int
-		HexColor    func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-	}
-
-	SessionIntegrations struct {
-		Builtins     func(childComplexity int) int
-		Integrations func(childComplexity int) int
-	}
-
-	SessionProject struct {
-		Documents          func(childComplexity int) int
-		FocusDocumentIndex func(childComplexity int) int
-		FocusWorkflowIndex func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		Name               func(childComplexity int) int
-		Workflows          func(childComplexity int) int
-	}
-
-	SessionTokens struct {
-		AccessToken func(childComplexity int) int
-		CsrfToken   func(childComplexity int) int
-	}
-
-	SessionUser struct {
-		ID      func(childComplexity int) int
-		Profile func(childComplexity int) int
-		Session func(childComplexity int) int
-	}
-
-	SessionWorkflow struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-	}
-
-	SessionWorkspace struct {
-		Avatar32url       func(childComplexity int) int
-		FocusProjectIndex func(childComplexity int) int
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Projects          func(childComplexity int) int
+		FocusWorkspaceIndex   func(childComplexity int) int
+		Layout                func(childComplexity int) int
+		Tokens                func(childComplexity int) int
+		WorkspaceFocusIndices func(childComplexity int) int
 	}
 
 	ShortcutButton struct {
@@ -140,15 +104,40 @@ type ComplexityRoot struct {
 		Route      func(childComplexity int) int
 	}
 
+	Tokens struct {
+		AccessToken func(childComplexity int) int
+		CsrfToken   func(childComplexity int) int
+	}
+
+	User struct {
+		ID         func(childComplexity int) int
+		Profile    func(childComplexity int) int
+		Session    func(childComplexity int) int
+		Workspaces func(childComplexity int) int
+	}
+
 	Workflow struct {
 		ID            func(childComplexity int) int
 		Name          func(childComplexity int) int
 		Specification func(childComplexity int) int
 	}
+
+	Workspace struct {
+		Avatar32url  func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Integrations func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Projects     func(childComplexity int) int
+	}
+
+	WorkspaceFocus struct {
+		FocusProjectIndex   func(childComplexity int) int
+		ProjectFocusIndices func(childComplexity int) int
+	}
 }
 
 type QueryResolver interface {
-	GetSessionUser(ctx context.Context, session *model.SessionInput) (*model.SessionUser, error)
+	GetSessionUser(ctx context.Context, session *model.SessionInput) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -229,6 +218,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Integration.Specification(childComplexity), true
 
+	case "Integrations.apps":
+		if e.complexity.Integrations.Apps == nil {
+			break
+		}
+
+		return e.complexity.Integrations.Apps(childComplexity), true
+
+	case "Integrations.builtins":
+		if e.complexity.Integrations.Builtins == nil {
+			break
+		}
+
+		return e.complexity.Integrations.Builtins(childComplexity), true
+
 	case "LayoutPreferences.activityBarMainShortcuts":
 		if e.complexity.LayoutPreferences.ActivityBarMainShortcuts == nil {
 			break
@@ -285,6 +288,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Profile.Username(childComplexity), true
 
+	case "Project.documents":
+		if e.complexity.Project.Documents == nil {
+			break
+		}
+
+		return e.complexity.Project.Documents(childComplexity), true
+
+	case "Project.id":
+		if e.complexity.Project.ID == nil {
+			break
+		}
+
+		return e.complexity.Project.ID(childComplexity), true
+
+	case "Project.name":
+		if e.complexity.Project.Name == nil {
+			break
+		}
+
+		return e.complexity.Project.Name(childComplexity), true
+
+	case "Project.workflows":
+		if e.complexity.Project.Workflows == nil {
+			break
+		}
+
+		return e.complexity.Project.Workflows(childComplexity), true
+
+	case "ProjectFocus.focusDocumentIndex":
+		if e.complexity.ProjectFocus.FocusDocumentIndex == nil {
+			break
+		}
+
+		return e.complexity.ProjectFocus.FocusDocumentIndex(childComplexity), true
+
+	case "ProjectFocus.focusWorkflowIndex":
+		if e.complexity.ProjectFocus.FocusWorkflowIndex == nil {
+			break
+		}
+
+		return e.complexity.ProjectFocus.FocusWorkflowIndex(childComplexity), true
+
 	case "Query.getSessionUser":
 		if e.complexity.Query.GetSessionUser == nil {
 			break
@@ -304,19 +349,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Session.FocusWorkspaceIndex(childComplexity), true
 
-	case "Session.integrations":
-		if e.complexity.Session.Integrations == nil {
+	case "Session.layout":
+		if e.complexity.Session.Layout == nil {
 			break
 		}
 
-		return e.complexity.Session.Integrations(childComplexity), true
-
-	case "Session.layoutPreferences":
-		if e.complexity.Session.LayoutPreferences == nil {
-			break
-		}
-
-		return e.complexity.Session.LayoutPreferences(childComplexity), true
+		return e.complexity.Session.Layout(childComplexity), true
 
 	case "Session.tokens":
 		if e.complexity.Session.Tokens == nil {
@@ -325,201 +363,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Session.Tokens(childComplexity), true
 
-	case "Session.workspaces":
-		if e.complexity.Session.Workspaces == nil {
+	case "Session.workspaceFocusIndices":
+		if e.complexity.Session.WorkspaceFocusIndices == nil {
 			break
 		}
 
-		return e.complexity.Session.Workspaces(childComplexity), true
-
-	case "SessionDocument.id":
-		if e.complexity.SessionDocument.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionDocument.ID(childComplexity), true
-
-	case "SessionDocument.name":
-		if e.complexity.SessionDocument.Name == nil {
-			break
-		}
-
-		return e.complexity.SessionDocument.Name(childComplexity), true
-
-	case "SessionIntegration.avatar32URL":
-		if e.complexity.SessionIntegration.Avatar32url == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegration.Avatar32url(childComplexity), true
-
-	case "SessionIntegration.description":
-		if e.complexity.SessionIntegration.Description == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegration.Description(childComplexity), true
-
-	case "SessionIntegration.hexColor":
-		if e.complexity.SessionIntegration.HexColor == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegration.HexColor(childComplexity), true
-
-	case "SessionIntegration.id":
-		if e.complexity.SessionIntegration.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegration.ID(childComplexity), true
-
-	case "SessionIntegration.name":
-		if e.complexity.SessionIntegration.Name == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegration.Name(childComplexity), true
-
-	case "SessionIntegrations.builtins":
-		if e.complexity.SessionIntegrations.Builtins == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegrations.Builtins(childComplexity), true
-
-	case "SessionIntegrations.integrations":
-		if e.complexity.SessionIntegrations.Integrations == nil {
-			break
-		}
-
-		return e.complexity.SessionIntegrations.Integrations(childComplexity), true
-
-	case "SessionProject.documents":
-		if e.complexity.SessionProject.Documents == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.Documents(childComplexity), true
-
-	case "SessionProject.focusDocumentIndex":
-		if e.complexity.SessionProject.FocusDocumentIndex == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.FocusDocumentIndex(childComplexity), true
-
-	case "SessionProject.focusWorkflowIndex":
-		if e.complexity.SessionProject.FocusWorkflowIndex == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.FocusWorkflowIndex(childComplexity), true
-
-	case "SessionProject.id":
-		if e.complexity.SessionProject.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.ID(childComplexity), true
-
-	case "SessionProject.name":
-		if e.complexity.SessionProject.Name == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.Name(childComplexity), true
-
-	case "SessionProject.workflows":
-		if e.complexity.SessionProject.Workflows == nil {
-			break
-		}
-
-		return e.complexity.SessionProject.Workflows(childComplexity), true
-
-	case "SessionTokens.accessToken":
-		if e.complexity.SessionTokens.AccessToken == nil {
-			break
-		}
-
-		return e.complexity.SessionTokens.AccessToken(childComplexity), true
-
-	case "SessionTokens.csrfToken":
-		if e.complexity.SessionTokens.CsrfToken == nil {
-			break
-		}
-
-		return e.complexity.SessionTokens.CsrfToken(childComplexity), true
-
-	case "SessionUser.id":
-		if e.complexity.SessionUser.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionUser.ID(childComplexity), true
-
-	case "SessionUser.profile":
-		if e.complexity.SessionUser.Profile == nil {
-			break
-		}
-
-		return e.complexity.SessionUser.Profile(childComplexity), true
-
-	case "SessionUser.session":
-		if e.complexity.SessionUser.Session == nil {
-			break
-		}
-
-		return e.complexity.SessionUser.Session(childComplexity), true
-
-	case "SessionWorkflow.id":
-		if e.complexity.SessionWorkflow.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkflow.ID(childComplexity), true
-
-	case "SessionWorkflow.name":
-		if e.complexity.SessionWorkflow.Name == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkflow.Name(childComplexity), true
-
-	case "SessionWorkspace.avatar32URL":
-		if e.complexity.SessionWorkspace.Avatar32url == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkspace.Avatar32url(childComplexity), true
-
-	case "SessionWorkspace.focusProjectIndex":
-		if e.complexity.SessionWorkspace.FocusProjectIndex == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkspace.FocusProjectIndex(childComplexity), true
-
-	case "SessionWorkspace.id":
-		if e.complexity.SessionWorkspace.ID == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkspace.ID(childComplexity), true
-
-	case "SessionWorkspace.name":
-		if e.complexity.SessionWorkspace.Name == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkspace.Name(childComplexity), true
-
-	case "SessionWorkspace.projects":
-		if e.complexity.SessionWorkspace.Projects == nil {
-			break
-		}
-
-		return e.complexity.SessionWorkspace.Projects(childComplexity), true
+		return e.complexity.Session.WorkspaceFocusIndices(childComplexity), true
 
 	case "ShortcutButton.entityName":
 		if e.complexity.ShortcutButton.EntityName == nil {
@@ -542,6 +391,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ShortcutButton.Route(childComplexity), true
 
+	case "Tokens.accessToken":
+		if e.complexity.Tokens.AccessToken == nil {
+			break
+		}
+
+		return e.complexity.Tokens.AccessToken(childComplexity), true
+
+	case "Tokens.csrfToken":
+		if e.complexity.Tokens.CsrfToken == nil {
+			break
+		}
+
+		return e.complexity.Tokens.CsrfToken(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
+
+	case "User.profile":
+		if e.complexity.User.Profile == nil {
+			break
+		}
+
+		return e.complexity.User.Profile(childComplexity), true
+
+	case "User.session":
+		if e.complexity.User.Session == nil {
+			break
+		}
+
+		return e.complexity.User.Session(childComplexity), true
+
+	case "User.workspaces":
+		if e.complexity.User.Workspaces == nil {
+			break
+		}
+
+		return e.complexity.User.Workspaces(childComplexity), true
+
 	case "Workflow.id":
 		if e.complexity.Workflow.ID == nil {
 			break
@@ -562,6 +453,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Workflow.Specification(childComplexity), true
+
+	case "Workspace.avatar32URL":
+		if e.complexity.Workspace.Avatar32url == nil {
+			break
+		}
+
+		return e.complexity.Workspace.Avatar32url(childComplexity), true
+
+	case "Workspace.id":
+		if e.complexity.Workspace.ID == nil {
+			break
+		}
+
+		return e.complexity.Workspace.ID(childComplexity), true
+
+	case "Workspace.integrations":
+		if e.complexity.Workspace.Integrations == nil {
+			break
+		}
+
+		return e.complexity.Workspace.Integrations(childComplexity), true
+
+	case "Workspace.name":
+		if e.complexity.Workspace.Name == nil {
+			break
+		}
+
+		return e.complexity.Workspace.Name(childComplexity), true
+
+	case "Workspace.projects":
+		if e.complexity.Workspace.Projects == nil {
+			break
+		}
+
+		return e.complexity.Workspace.Projects(childComplexity), true
+
+	case "WorkspaceFocus.focusProjectIndex":
+		if e.complexity.WorkspaceFocus.FocusProjectIndex == nil {
+			break
+		}
+
+		return e.complexity.WorkspaceFocus.FocusProjectIndex(childComplexity), true
+
+	case "WorkspaceFocus.projectFocusIndices":
+		if e.complexity.WorkspaceFocus.ProjectFocusIndices == nil {
+			break
+		}
+
+		return e.complexity.WorkspaceFocus.ProjectFocusIndices(childComplexity), true
 
 	}
 	return 0, false
@@ -613,31 +553,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "internal/mockql/schema/document.graphqls", Input: `interface IDocument {
-  id: String!
-  name: String!
-}
-
-type Document implements IDocument {
+	{Name: "internal/mockql/schema/document.graphqls", Input: `type Document {
   id: String!
   name: String!
   specification: String
-}
-
-type SessionDocument implements IDocument {
-  id: String!
-  name: String!
 }
 `, BuiltIn: false},
-	{Name: "internal/mockql/schema/integration.graphqls", Input: `interface IIntegration {
-  name: String!
-  id: String!
-  description: String!
-  avatar32URL: String
-  hexColor: String
-}
-
-type Integration implements IIntegration {
+	{Name: "internal/mockql/schema/integration.graphqls", Input: `type Integration {
   name: String!
   id: String!
   description: String!
@@ -646,21 +568,13 @@ type Integration implements IIntegration {
   specification: String
 }
 
-type SessionIntegration implements IIntegration {
-  name: String!
-  id: String!
-  description: String!
-  avatar32URL: String
-  hexColor: String
-}
-
-type SessionIntegrations {
-  integrations: [SessionIntegration]!
-  builtins: [SessionIntegration]!
+type Integrations {
+  apps: [Integration]!
+  builtins: [Integration]!
 }
 `, BuiltIn: false},
 	{Name: "internal/mockql/schema/main.graphqls", Input: `type Query {
-  getSessionUser(session: SessionInput): SessionUser
+  getSessionUser(session: SessionInput): User
 }
 `, BuiltIn: false},
 	{Name: "internal/mockql/schema/preferences.graphqls", Input: `type LayoutPreferences {
@@ -683,90 +597,65 @@ type ShortcutButton {
   avatar32URL: String
 }
 `, BuiltIn: false},
-	{Name: "internal/mockql/schema/project.graphqls", Input: `interface IProject {
+	{Name: "internal/mockql/schema/project.graphqls", Input: `type Project {
     name: String!
     id: String!
+    documents: [Document]!
+    workflows: [Workflow]!
 }
 
-type SessionProject implements IProject {
-    name: String!
-    id: String!
-
-    focusWorkflowIndex: Int!
-    workflows: [SessionWorkflow]!
-
-    focusDocumentIndex: Int!
-    documents: [SessionDocument]!
-}
 
 `, BuiltIn: false},
 	{Name: "internal/mockql/schema/session.graphqls", Input: `type Session {
-  tokens: SessionTokens
-  layoutPreferences: LayoutPreferences!
+  tokens: Tokens
+  layout: LayoutPreferences!
   focusWorkspaceIndex: Int!
-  workspaces: [SessionWorkspace]!
-  integrations: SessionIntegrations
+  workspaceFocusIndices: [WorkspaceFocus]!
+}
+
+type WorkspaceFocus {
+  focusProjectIndex: Int!
+  projectFocusIndices: [ProjectFocus]!
+}
+
+type ProjectFocus {
+  focusWorkflowIndex: Int!
+  focusDocumentIndex: Int!
 }
 
 input SessionInput {
-  tokens: SessionTokensInput
+  tokens: TokensInput
 }
 `, BuiltIn: false},
-	{Name: "internal/mockql/schema/token.graphqls", Input: `interface ITokens {
+	{Name: "internal/mockql/schema/token.graphqls", Input: `type Tokens {
   accessToken: String!
   csrfToken: String!
 }
 
-type SessionTokens implements ITokens {
-  accessToken: String!
-  csrfToken: String!
-}
-
-input SessionTokensInput {
+input TokensInput {
   accessToken: String!
   csrfToken: String!
 }
 `, BuiltIn: false},
-	{Name: "internal/mockql/schema/user.graphqls", Input: `interface IUser {
+	{Name: "internal/mockql/schema/user.graphqls", Input: `type User {
   id: String!
   profile: Profile!
+  session: Session
+  workspaces: [Workspace]
 }
-
-type SessionUser implements IUser {
+`, BuiltIn: false},
+	{Name: "internal/mockql/schema/workflow.graphqls", Input: `type Workflow {
+  name: String!
   id: String!
-  profile: Profile!
-  session: Session!
+  specification: String
 }
 `, BuiltIn: false},
-	{Name: "internal/mockql/schema/workflow.graphqls", Input: `interface IWorkflow {
-    name: String!
-    id: String!
-}
-
-type Workflow implements IWorkflow {
-    name: String!
-    id: String!
-    specification: String
-}
-
-type SessionWorkflow implements IWorkflow {
-    name: String!
-    id: String!
-}
-`, BuiltIn: false},
-	{Name: "internal/mockql/schema/workspace.graphqls", Input: `interface IWorkspace {
+	{Name: "internal/mockql/schema/workspace.graphqls", Input: `type Workspace {
   id: String!
   name: String!
   avatar32URL: String
-}
-
-type SessionWorkspace implements IWorkspace {
-  id: String!
-  name: String!
-  avatar32URL: String
-
-  focusProjectIndex: Int!
-  projects: [SessionProject]!
+  projects: [Project]!
+  integrations: [Integrations]
 }
 `, BuiltIn: false},
 }
@@ -1147,6 +1036,76 @@ func (ec *executionContext) _Integration_specification(ctx context.Context, fiel
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Integrations_apps(ctx context.Context, field graphql.CollectedField, obj *model.Integrations) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Integrations",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Apps, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Integration)
+	fc.Result = res
+	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Integrations_builtins(ctx context.Context, field graphql.CollectedField, obj *model.Integrations) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Integrations",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Builtins, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Integration)
+	fc.Result = res
+	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _LayoutPreferences_activityBarMainShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.LayoutPreferences) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1409,6 +1368,216 @@ func (ec *executionContext) _Profile_avatar32URL(ctx context.Context, field grap
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Project_name(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Project_id(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Project_documents(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Documents, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Document)
+	fc.Result = res
+	return ec.marshalNDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Project_workflows(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workflows, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Workflow)
+	fc.Result = res
+	return ec.marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProjectFocus_focusWorkflowIndex(ctx context.Context, field graphql.CollectedField, obj *model.ProjectFocus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProjectFocus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusWorkflowIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProjectFocus_focusDocumentIndex(ctx context.Context, field graphql.CollectedField, obj *model.ProjectFocus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProjectFocus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusDocumentIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1443,9 +1612,9 @@ func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.SessionUser)
+	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOSessionUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1546,12 +1715,12 @@ func (ec *executionContext) _Session_tokens(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.SessionTokens)
+	res := resTmp.(*model.Tokens)
 	fc.Result = res
-	return ec.marshalOSessionTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionTokens(ctx, field.Selections, res)
+	return ec.marshalOTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Session_layoutPreferences(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
+func (ec *executionContext) _Session_layout(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1569,7 +1738,7 @@ func (ec *executionContext) _Session_layoutPreferences(ctx context.Context, fiel
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.LayoutPreferences, nil
+		return obj.Layout, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1621,7 +1790,7 @@ func (ec *executionContext) _Session_focusWorkspaceIndex(ctx context.Context, fi
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Session_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
+func (ec *executionContext) _Session_workspaceFocusIndices(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1639,7 +1808,7 @@ func (ec *executionContext) _Session_workspaces(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Workspaces, nil
+		return obj.WorkspaceFocusIndices, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1651,977 +1820,9 @@ func (ec *executionContext) _Session_workspaces(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.SessionWorkspace)
+	res := resTmp.([]*model.WorkspaceFocus)
 	fc.Result = res
-	return ec.marshalNSessionWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkspace(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Session_integrations(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Session",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Integrations, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.SessionIntegrations)
-	fc.Result = res
-	return ec.marshalOSessionIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegrations(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionDocument_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionDocument) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionDocument",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionDocument_name(ctx context.Context, field graphql.CollectedField, obj *model.SessionDocument) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionDocument",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegration_name(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegration) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegration",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegration_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegration) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegration",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegration_description(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegration) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegration",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegration_avatar32URL(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegration) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegration",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Avatar32url, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegration_hexColor(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegration) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegration",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.HexColor, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegrations_integrations(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegrations) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegrations",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Integrations, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SessionIntegration)
-	fc.Result = res
-	return ec.marshalNSessionIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegration(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionIntegrations_builtins(ctx context.Context, field graphql.CollectedField, obj *model.SessionIntegrations) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionIntegrations",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Builtins, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SessionIntegration)
-	fc.Result = res
-	return ec.marshalNSessionIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegration(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_name(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_focusWorkflowIndex(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FocusWorkflowIndex, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_workflows(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Workflows, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SessionWorkflow)
-	fc.Result = res
-	return ec.marshalNSessionWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkflow(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_focusDocumentIndex(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FocusDocumentIndex, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionProject_documents(ctx context.Context, field graphql.CollectedField, obj *model.SessionProject) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionProject",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Documents, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SessionDocument)
-	fc.Result = res
-	return ec.marshalNSessionDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionDocument(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionTokens_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.SessionTokens) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionTokens",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionTokens_csrfToken(ctx context.Context, field graphql.CollectedField, obj *model.SessionTokens) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionTokens",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CsrfToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionUser_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionUser) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionUser",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionUser_profile(ctx context.Context, field graphql.CollectedField, obj *model.SessionUser) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionUser",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Profile, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Profile)
-	fc.Result = res
-	return ec.marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionUser_session(ctx context.Context, field graphql.CollectedField, obj *model.SessionUser) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionUser",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Session, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Session)
-	fc.Result = res
-	return ec.marshalNSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkflow_name(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkflow_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkspace_id(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkspace_name(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkspace_avatar32URL(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Avatar32url, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkspace_focusProjectIndex(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FocusProjectIndex, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SessionWorkspace_projects(ctx context.Context, field graphql.CollectedField, obj *model.SessionWorkspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SessionWorkspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Projects, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.SessionProject)
-	fc.Result = res
-	return ec.marshalNSessionProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionProject(ctx, field.Selections, res)
+	return ec.marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ShortcutButton_iconName(ctx context.Context, field graphql.CollectedField, obj *model.ShortcutButton) (ret graphql.Marshaler) {
@@ -2718,6 +1919,210 @@ func (ec *executionContext) _ShortcutButton_route(ctx context.Context, field gra
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Tokens_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Tokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccessToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Tokens_csrfToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Tokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CsrfToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_profile(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Profile, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_session(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Session, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Session)
+	fc.Result = res
+	return ec.marshalOSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workspaces, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Workspace)
+	fc.Result = res
+	return ec.marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
@@ -2820,6 +2225,245 @@ func (ec *executionContext) _Workflow_specification(ctx context.Context, field g
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workspace_id(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workspace_name(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workspace_avatar32URL(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar32url, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workspace_projects(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Projects, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Project)
+	fc.Result = res
+	return ec.marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workspace_integrations(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Integrations, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Integrations)
+	fc.Result = res
+	return ec.marshalOIntegrations2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorkspaceFocus_focusProjectIndex(ctx context.Context, field graphql.CollectedField, obj *model.WorkspaceFocus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorkspaceFocus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusProjectIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorkspaceFocus_projectFocusIndices(ctx context.Context, field graphql.CollectedField, obj *model.WorkspaceFocus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorkspaceFocus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProjectFocusIndices, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProjectFocus)
+	fc.Result = res
+	return ec.marshalNProjectFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3919,7 +3563,7 @@ func (ec *executionContext) unmarshalInputSessionInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokens"))
-			it.Tokens, err = ec.unmarshalOSessionTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionTokensInput(ctx, v)
+			it.Tokens, err = ec.unmarshalOTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3929,8 +3573,8 @@ func (ec *executionContext) unmarshalInputSessionInput(ctx context.Context, obj 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSessionTokensInput(ctx context.Context, obj interface{}) (model.SessionTokensInput, error) {
-	var it model.SessionTokensInput
+func (ec *executionContext) unmarshalInputTokensInput(ctx context.Context, obj interface{}) (model.TokensInput, error) {
+	var it model.TokensInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3961,144 +3605,11 @@ func (ec *executionContext) unmarshalInputSessionTokensInput(ctx context.Context
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _IDocument(ctx context.Context, sel ast.SelectionSet, obj model.IDocument) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Document:
-		return ec._Document(ctx, sel, &obj)
-	case *model.Document:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Document(ctx, sel, obj)
-	case model.SessionDocument:
-		return ec._SessionDocument(ctx, sel, &obj)
-	case *model.SessionDocument:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionDocument(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _IIntegration(ctx context.Context, sel ast.SelectionSet, obj model.IIntegration) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Integration:
-		return ec._Integration(ctx, sel, &obj)
-	case *model.Integration:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Integration(ctx, sel, obj)
-	case model.SessionIntegration:
-		return ec._SessionIntegration(ctx, sel, &obj)
-	case *model.SessionIntegration:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionIntegration(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _IProject(ctx context.Context, sel ast.SelectionSet, obj model.IProject) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.SessionProject:
-		return ec._SessionProject(ctx, sel, &obj)
-	case *model.SessionProject:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionProject(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _ITokens(ctx context.Context, sel ast.SelectionSet, obj model.ITokens) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.SessionTokens:
-		return ec._SessionTokens(ctx, sel, &obj)
-	case *model.SessionTokens:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionTokens(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _IUser(ctx context.Context, sel ast.SelectionSet, obj model.IUser) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.SessionUser:
-		return ec._SessionUser(ctx, sel, &obj)
-	case *model.SessionUser:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionUser(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _IWorkflow(ctx context.Context, sel ast.SelectionSet, obj model.IWorkflow) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Workflow:
-		return ec._Workflow(ctx, sel, &obj)
-	case *model.Workflow:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Workflow(ctx, sel, obj)
-	case model.SessionWorkflow:
-		return ec._SessionWorkflow(ctx, sel, &obj)
-	case *model.SessionWorkflow:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionWorkflow(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
-func (ec *executionContext) _IWorkspace(ctx context.Context, sel ast.SelectionSet, obj model.IWorkspace) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.SessionWorkspace:
-		return ec._SessionWorkspace(ctx, sel, &obj)
-	case *model.SessionWorkspace:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._SessionWorkspace(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var documentImplementors = []string{"Document", "IDocument"}
+var documentImplementors = []string{"Document"}
 
 func (ec *executionContext) _Document(ctx context.Context, sel ast.SelectionSet, obj *model.Document) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, documentImplementors)
@@ -4132,7 +3643,7 @@ func (ec *executionContext) _Document(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var integrationImplementors = []string{"Integration", "IIntegration"}
+var integrationImplementors = []string{"Integration"}
 
 func (ec *executionContext) _Integration(ctx context.Context, sel ast.SelectionSet, obj *model.Integration) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, integrationImplementors)
@@ -4164,6 +3675,38 @@ func (ec *executionContext) _Integration(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._Integration_hexColor(ctx, field, obj)
 		case "specification":
 			out.Values[i] = ec._Integration_specification(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var integrationsImplementors = []string{"Integrations"}
+
+func (ec *executionContext) _Integrations(ctx context.Context, sel ast.SelectionSet, obj *model.Integrations) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, integrationsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Integrations")
+		case "apps":
+			out.Values[i] = ec._Integrations_apps(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "builtins":
+			out.Values[i] = ec._Integrations_builtins(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4241,6 +3784,80 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var projectImplementors = []string{"Project"}
+
+func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, obj *model.Project) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, projectImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Project")
+		case "name":
+			out.Values[i] = ec._Project_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "id":
+			out.Values[i] = ec._Project_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "documents":
+			out.Values[i] = ec._Project_documents(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "workflows":
+			out.Values[i] = ec._Project_workflows(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var projectFocusImplementors = []string{"ProjectFocus"}
+
+func (ec *executionContext) _ProjectFocus(ctx context.Context, sel ast.SelectionSet, obj *model.ProjectFocus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, projectFocusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProjectFocus")
+		case "focusWorkflowIndex":
+			out.Values[i] = ec._ProjectFocus_focusWorkflowIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusDocumentIndex":
+			out.Values[i] = ec._ProjectFocus_focusDocumentIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -4295,8 +3912,8 @@ func (ec *executionContext) _Session(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Session")
 		case "tokens":
 			out.Values[i] = ec._Session_tokens(ctx, field, obj)
-		case "layoutPreferences":
-			out.Values[i] = ec._Session_layoutPreferences(ctx, field, obj)
+		case "layout":
+			out.Values[i] = ec._Session_layout(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4305,312 +3922,8 @@ func (ec *executionContext) _Session(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "workspaces":
-			out.Values[i] = ec._Session_workspaces(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "integrations":
-			out.Values[i] = ec._Session_integrations(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionDocumentImplementors = []string{"SessionDocument", "IDocument"}
-
-func (ec *executionContext) _SessionDocument(ctx context.Context, sel ast.SelectionSet, obj *model.SessionDocument) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionDocumentImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionDocument")
-		case "id":
-			out.Values[i] = ec._SessionDocument_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._SessionDocument_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionIntegrationImplementors = []string{"SessionIntegration", "IIntegration"}
-
-func (ec *executionContext) _SessionIntegration(ctx context.Context, sel ast.SelectionSet, obj *model.SessionIntegration) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionIntegrationImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionIntegration")
-		case "name":
-			out.Values[i] = ec._SessionIntegration_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._SessionIntegration_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "description":
-			out.Values[i] = ec._SessionIntegration_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "avatar32URL":
-			out.Values[i] = ec._SessionIntegration_avatar32URL(ctx, field, obj)
-		case "hexColor":
-			out.Values[i] = ec._SessionIntegration_hexColor(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionIntegrationsImplementors = []string{"SessionIntegrations"}
-
-func (ec *executionContext) _SessionIntegrations(ctx context.Context, sel ast.SelectionSet, obj *model.SessionIntegrations) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionIntegrationsImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionIntegrations")
-		case "integrations":
-			out.Values[i] = ec._SessionIntegrations_integrations(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "builtins":
-			out.Values[i] = ec._SessionIntegrations_builtins(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionProjectImplementors = []string{"SessionProject", "IProject"}
-
-func (ec *executionContext) _SessionProject(ctx context.Context, sel ast.SelectionSet, obj *model.SessionProject) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionProjectImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionProject")
-		case "name":
-			out.Values[i] = ec._SessionProject_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._SessionProject_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "focusWorkflowIndex":
-			out.Values[i] = ec._SessionProject_focusWorkflowIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "workflows":
-			out.Values[i] = ec._SessionProject_workflows(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "focusDocumentIndex":
-			out.Values[i] = ec._SessionProject_focusDocumentIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "documents":
-			out.Values[i] = ec._SessionProject_documents(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionTokensImplementors = []string{"SessionTokens", "ITokens"}
-
-func (ec *executionContext) _SessionTokens(ctx context.Context, sel ast.SelectionSet, obj *model.SessionTokens) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionTokensImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionTokens")
-		case "accessToken":
-			out.Values[i] = ec._SessionTokens_accessToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "csrfToken":
-			out.Values[i] = ec._SessionTokens_csrfToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionUserImplementors = []string{"SessionUser", "IUser"}
-
-func (ec *executionContext) _SessionUser(ctx context.Context, sel ast.SelectionSet, obj *model.SessionUser) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionUserImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionUser")
-		case "id":
-			out.Values[i] = ec._SessionUser_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "profile":
-			out.Values[i] = ec._SessionUser_profile(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "session":
-			out.Values[i] = ec._SessionUser_session(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionWorkflowImplementors = []string{"SessionWorkflow", "IWorkflow"}
-
-func (ec *executionContext) _SessionWorkflow(ctx context.Context, sel ast.SelectionSet, obj *model.SessionWorkflow) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionWorkflowImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionWorkflow")
-		case "name":
-			out.Values[i] = ec._SessionWorkflow_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._SessionWorkflow_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var sessionWorkspaceImplementors = []string{"SessionWorkspace", "IWorkspace"}
-
-func (ec *executionContext) _SessionWorkspace(ctx context.Context, sel ast.SelectionSet, obj *model.SessionWorkspace) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, sessionWorkspaceImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SessionWorkspace")
-		case "id":
-			out.Values[i] = ec._SessionWorkspace_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._SessionWorkspace_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "avatar32URL":
-			out.Values[i] = ec._SessionWorkspace_avatar32URL(ctx, field, obj)
-		case "focusProjectIndex":
-			out.Values[i] = ec._SessionWorkspace_focusProjectIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "projects":
-			out.Values[i] = ec._SessionWorkspace_projects(ctx, field, obj)
+		case "workspaceFocusIndices":
+			out.Values[i] = ec._Session_workspaceFocusIndices(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4653,7 +3966,75 @@ func (ec *executionContext) _ShortcutButton(ctx context.Context, sel ast.Selecti
 	return out
 }
 
-var workflowImplementors = []string{"Workflow", "IWorkflow"}
+var tokensImplementors = []string{"Tokens"}
+
+func (ec *executionContext) _Tokens(ctx context.Context, sel ast.SelectionSet, obj *model.Tokens) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tokensImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Tokens")
+		case "accessToken":
+			out.Values[i] = ec._Tokens_accessToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "csrfToken":
+			out.Values[i] = ec._Tokens_csrfToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userImplementors = []string{"User"}
+
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "profile":
+			out.Values[i] = ec._User_profile(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "session":
+			out.Values[i] = ec._User_session(ctx, field, obj)
+		case "workspaces":
+			out.Values[i] = ec._User_workspaces(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var workflowImplementors = []string{"Workflow"}
 
 func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet, obj *model.Workflow) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, workflowImplementors)
@@ -4676,6 +4057,79 @@ func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "specification":
 			out.Values[i] = ec._Workflow_specification(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var workspaceImplementors = []string{"Workspace"}
+
+func (ec *executionContext) _Workspace(ctx context.Context, sel ast.SelectionSet, obj *model.Workspace) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, workspaceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Workspace")
+		case "id":
+			out.Values[i] = ec._Workspace_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Workspace_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "avatar32URL":
+			out.Values[i] = ec._Workspace_avatar32URL(ctx, field, obj)
+		case "projects":
+			out.Values[i] = ec._Workspace_projects(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "integrations":
+			out.Values[i] = ec._Workspace_integrations(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var workspaceFocusImplementors = []string{"WorkspaceFocus"}
+
+func (ec *executionContext) _WorkspaceFocus(ctx context.Context, sel ast.SelectionSet, obj *model.WorkspaceFocus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, workspaceFocusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WorkspaceFocus")
+		case "focusProjectIndex":
+			out.Values[i] = ec._WorkspaceFocus_focusProjectIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "projectFocusIndices":
+			out.Values[i] = ec._WorkspaceFocus_projectFocusIndices(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4947,6 +4401,43 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v []*model.Document) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalODocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4960,6 +4451,43 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v []*model.Integration) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNLayoutPreferences2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐLayoutPreferences(ctx context.Context, sel ast.SelectionSet, v *model.LayoutPreferences) graphql.Marshaler {
@@ -4982,17 +4510,7 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapi
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx context.Context, sel ast.SelectionSet, v *model.Session) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Session(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNSessionDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionDocument(ctx context.Context, sel ast.SelectionSet, v []*model.SessionDocument) graphql.Marshaler {
+func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v []*model.Project) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5016,7 +4534,7 @@ func (ec *executionContext) marshalNSessionDocument2ᚕᚖgithubᚗcomᚋsageflo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOSessionDocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionDocument(ctx, sel, v[i])
+			ret[i] = ec.marshalOProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5029,7 +4547,7 @@ func (ec *executionContext) marshalNSessionDocument2ᚕᚖgithubᚗcomᚋsageflo
 	return ret
 }
 
-func (ec *executionContext) marshalNSessionIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegration(ctx context.Context, sel ast.SelectionSet, v []*model.SessionIntegration) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v []*model.ProjectFocus) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5053,118 +4571,7 @@ func (ec *executionContext) marshalNSessionIntegration2ᚕᚖgithubᚗcomᚋsage
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOSessionIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegration(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNSessionProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionProject(ctx context.Context, sel ast.SelectionSet, v []*model.SessionProject) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOSessionProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionProject(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNSessionWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkflow(ctx context.Context, sel ast.SelectionSet, v []*model.SessionWorkflow) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOSessionWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkflow(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNSessionWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkspace(ctx context.Context, sel ast.SelectionSet, v []*model.SessionWorkspace) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOSessionWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkspace(ctx, sel, v[i])
+			ret[i] = ec.marshalOProjectFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5190,6 +4597,80 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v []*model.Workflow) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v []*model.WorkspaceFocus) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOWorkspaceFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -5445,11 +4926,86 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOSessionDocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionDocument(ctx context.Context, sel ast.SelectionSet, v *model.SessionDocument) graphql.Marshaler {
+func (ec *executionContext) marshalODocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v *model.Document) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._SessionDocument(ctx, sel, v)
+	return ec._Document(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v *model.Integration) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Integration(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOIntegrations2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v []*model.Integrations) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v *model.Integrations) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Integrations(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v *model.Project) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Project(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProjectFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v *model.ProjectFocus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProjectFocus(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx context.Context, sel ast.SelectionSet, v *model.Session) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Session(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOSessionInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionInput(ctx context.Context, v interface{}) (*model.SessionInput, error) {
@@ -5458,63 +5014,6 @@ func (ec *executionContext) unmarshalOSessionInput2ᚖgithubᚗcomᚋsageflowᚋ
 	}
 	res, err := ec.unmarshalInputSessionInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOSessionIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegration(ctx context.Context, sel ast.SelectionSet, v *model.SessionIntegration) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionIntegration(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSessionIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionIntegrations(ctx context.Context, sel ast.SelectionSet, v *model.SessionIntegrations) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionIntegrations(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSessionProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionProject(ctx context.Context, sel ast.SelectionSet, v *model.SessionProject) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionProject(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSessionTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionTokens(ctx context.Context, sel ast.SelectionSet, v *model.SessionTokens) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionTokens(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOSessionTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionTokensInput(ctx context.Context, v interface{}) (*model.SessionTokensInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputSessionTokensInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOSessionUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionUser(ctx context.Context, sel ast.SelectionSet, v *model.SessionUser) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionUser(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSessionWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.SessionWorkflow) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionWorkflow(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSessionWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionWorkspace(ctx context.Context, sel ast.SelectionSet, v *model.SessionWorkspace) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SessionWorkspace(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx context.Context, sel ast.SelectionSet, v []*model.ShortcutButton) graphql.Marshaler {
@@ -5586,6 +5085,89 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx context.Context, sel ast.SelectionSet, v *model.Tokens) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Tokens(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx context.Context, v interface{}) (*model.TokensInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTokensInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.Workflow) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Workflow(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v []*model.Workspace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v *model.Workspace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Workspace(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOWorkspaceFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v *model.WorkspaceFocus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._WorkspaceFocus(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

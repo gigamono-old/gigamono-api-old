@@ -1,14 +1,7 @@
-interface IWorkspace {
+type Workspace {
   id: String!
   name: String!
   avatar32URL: String
-}
-
-type SessionWorkspace implements IWorkspace {
-  id: String!
-  name: String!
-  avatar32URL: String
-
-  focusProjectIndex: Int!
-  projects: [SessionProject]!
+  projects: [Project]!
+  integrations: [Integrations]
 }
