@@ -3,4 +3,5 @@ type User {
   profile: Profile!
   session: Session
   workspaces: [Workspace]
+  integrations: Integrations
 }

@@ -110,10 +110,11 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		ID         func(childComplexity int) int
-		Profile    func(childComplexity int) int
-		Session    func(childComplexity int) int
-		Workspaces func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Integrations func(childComplexity int) int
+		Profile      func(childComplexity int) int
+		Session      func(childComplexity int) int
+		Workspaces   func(childComplexity int) int
 	}
 
 	Workflow struct {
@@ -123,11 +124,10 @@ type ComplexityRoot struct {
 	}
 
 	Workspace struct {
-		Avatar32url  func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Integrations func(childComplexity int) int
-		Name         func(childComplexity int) int
-		Projects     func(childComplexity int) int
+		Avatar32url func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Projects    func(childComplexity int) int
 	}
 
 	WorkspaceFocus struct {
@@ -412,6 +412,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ID(childComplexity), true
 
+	case "User.integrations":
+		if e.complexity.User.Integrations == nil {
+			break
+		}
+
+		return e.complexity.User.Integrations(childComplexity), true
+
 	case "User.profile":
 		if e.complexity.User.Profile == nil {
 			break
@@ -467,13 +474,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Workspace.ID(childComplexity), true
-
-	case "Workspace.integrations":
-		if e.complexity.Workspace.Integrations == nil {
-			break
-		}
-
-		return e.complexity.Workspace.Integrations(childComplexity), true
 
 	case "Workspace.name":
 		if e.complexity.Workspace.Name == nil {
@@ -642,6 +642,7 @@ input TokensInput {
   profile: Profile!
   session: Session
   workspaces: [Workspace]
+  integrations: Integrations
 }
 `, BuiltIn: false},
 	{Name: "internal/mockql/schema/workflow.graphqls", Input: `type Workflow {
@@ -655,7 +656,6 @@ input TokensInput {
   name: String!
   avatar32URL: String
   projects: [Project]!
-  integrations: [Integrations]
 }
 `, BuiltIn: false},
 }
@@ -2125,6 +2125,38 @@ func (ec *executionContext) _User_workspaces(ctx context.Context, field graphql.
 	return ec.marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_integrations(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Integrations, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Integrations)
+	fc.Result = res
+	return ec.marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2362,38 +2394,6 @@ func (ec *executionContext) _Workspace_projects(ctx context.Context, field graph
 	res := resTmp.([]*model.Project)
 	fc.Result = res
 	return ec.marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workspace_integrations(ctx context.Context, field graphql.CollectedField, obj *model.Workspace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workspace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Integrations, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Integrations)
-	fc.Result = res
-	return ec.marshalOIntegrations2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _WorkspaceFocus_focusProjectIndex(ctx context.Context, field graphql.CollectedField, obj *model.WorkspaceFocus) (ret graphql.Marshaler) {
@@ -4023,6 +4023,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_session(ctx, field, obj)
 		case "workspaces":
 			out.Values[i] = ec._User_workspaces(ctx, field, obj)
+		case "integrations":
+			out.Values[i] = ec._User_integrations(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4096,8 +4098,6 @@ func (ec *executionContext) _Workspace(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "integrations":
-			out.Values[i] = ec._Workspace_integrations(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4938,46 +4938,6 @@ func (ec *executionContext) marshalOIntegration2ᚖgithubᚗcomᚋsageflowᚋsag
 		return graphql.Null
 	}
 	return ec._Integration(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOIntegrations2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v []*model.Integrations) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v *model.Integrations) graphql.Marshaler {

@@ -1,1 +1,20 @@
+version: 1
+kind: Document
 
+metadata:
+  name: Customers
+  description: Information about each customer is saved here
+  authors:
+    - name: James Brown
+      email: james@brown.com
+
+integration: # integration.yaml
+  kind: SQL
+  name: ...
+
+views:
+  - name: Customers
+
+# db_kind, db_name
+# documentcredentials.yaml -> db_uri
+#

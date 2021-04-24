@@ -72,10 +72,11 @@ type TokensInput struct {
 	CsrfToken   string `json:"csrfToken" `
 }
 type User struct {
-	ID         string       `json:"id" `
-	Profile    *Profile     `json:"profile" `
-	Session    *Session     `json:"session" `
-	Workspaces []*Workspace `json:"workspaces" `
+	ID           string        `json:"id" `
+	Profile      *Profile      `json:"profile" `
+	Session      *Session      `json:"session" `
+	Workspaces   []*Workspace  `json:"workspaces" `
+	Integrations *Integrations `json:"integrations" `
 }
 type Workflow struct {
 	Name          string  `json:"name" `
@@ -83,11 +84,10 @@ type Workflow struct {
 	Specification *string `json:"specification" `
 }
 type Workspace struct {
-	ID           string          `json:"id" `
-	Name         string          `json:"name" `
-	Avatar32url  *string         `json:"avatar32URL" `
-	Projects     []*Project      `json:"projects" `
-	Integrations []*Integrations `json:"integrations" `
+	ID          string     `json:"id" `
+	Name        string     `json:"name" `
+	Avatar32url *string    `json:"avatar32URL" `
+	Projects    []*Project `json:"projects" `
 }
 type WorkspaceFocus struct {
 	FocusProjectIndex   int             `json:"focusProjectIndex" `

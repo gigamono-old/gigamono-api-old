@@ -3,5 +3,4 @@ type Workspace {
   name: String!
   avatar32URL: String
   projects: [Project]!
-  integrations: [Integrations]
 }
