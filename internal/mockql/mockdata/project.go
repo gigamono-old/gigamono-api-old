@@ -1,6 +1,6 @@
 package mockdata
 
-import "github.com/sageflow/sageapi/internal/mockql/model"
+import "github.com/gigamono/gigamono-api/internal/mockql/model"
 
 func getProjects() []*model.Project {
 	return []*model.Project{

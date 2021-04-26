@@ -1,8 +1,8 @@
 package mockdata
 
 import (
-	"github.com/sageflow/sageapi/internal/mockql/model"
-	"github.com/sageflow/sageflow/pkg/strs"
+	"github.com/gigamono/gigamono-api/internal/mockql/model"
+	"github.com/gigamono/gigamono/pkg/strs"
 )
 
 func getUserProfile() *model.Profile {

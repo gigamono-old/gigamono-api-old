@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/sageflow/sageflow/pkg/logs"
-	"github.com/sageflow/sageflow/pkg/services/grpc"
-	"github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono/pkg/logs"
+	"github.com/gigamono/gigamono/pkg/services/grpc"
+	"github.com/gigamono/gigamono/pkg/services/proto/generated"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sageflow/sageflow/pkg/inits"
+	"github.com/gigamono/gigamono/pkg/inits"
 )
 
 // APIServer represents an new REST-based server instance.

@@ -2,8 +2,8 @@ package resolver
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/sageflow/sageflow/pkg/inits"
-	"github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono/pkg/inits"
+	"github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
 // This file will not be regenerated automatically.

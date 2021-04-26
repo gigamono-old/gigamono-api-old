@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/contrib/static"
-	"github.com/sageflow/sageapi/internal/mockql"
+	"github.com/gigamono/gigamono-api/internal/mockql"
 )
 
 func (server *APIServer) httpServe(listener net.Listener) error {

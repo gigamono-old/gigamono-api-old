@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
-	"github.com/sageflow/sageapi/internal/mockql/generated"
-	"github.com/sageflow/sageapi/internal/mockql/resolver"
-	"github.com/sageflow/sageflow/pkg/inits"
-	"github.com/sageflow/sageflow/pkg/services/graphql/interceptors"
-	proto "github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono-api/internal/mockql/generated"
+	"github.com/gigamono/gigamono-api/internal/mockql/resolver"
+	"github.com/gigamono/gigamono/pkg/inits"
+	"github.com/gigamono/gigamono/pkg/services/graphql/interceptors"
+	proto "github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
 // Handler handles requests to a graphQL route.

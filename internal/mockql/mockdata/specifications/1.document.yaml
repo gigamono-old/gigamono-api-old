@@ -8,13 +8,49 @@ metadata:
     - name: James Brown
       email: james@brown.com
 
-integration: # integration.yaml
-  kind: SQL
-  name: ...
+source:
+  builtin: null # e.g. MySQL, Postgres, ...
+  integration: # Any action named `fetch_document` is used to fetch initial data.
+    name: Facebook
+    id: 807a31fe-cb1d-4a1a-bd38-3e7228e4ac94
 
 views:
   - name: Customers
+    schema:
+        - name: Name
+          kind: single_line_text
+        - name: Available Products
+          kind: relationship
 
-# db_kind, db_name
-# documentcredentials.yaml -> db_uri
-#
+    table:
+      grouped_by:
+        - state
+        - county
+      filtered_by:
+        - op: contains
+          field: name
+          rhs: james
+      sorted_by:
+        - field: name
+          order: ascending
+      hidden_fields:
+        - updated_at
+        - created_at
+        - modified_at
+      layout:
+        row_height: short
+
+    board:
+      stacked_by: state
+      filtered_by:
+        - op: contains
+          field: name
+          rhs: james
+      sorted_by:
+        - field: name
+          order: ascending
+      hidden_fields:
+        - updated_at
+        - created_at
+        - modified_at
+

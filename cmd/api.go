@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sageflow/sageflow/pkg/inits"
-	"github.com/sageflow/sageflow/pkg/logs"
+	"github.com/gigamono/gigamono/pkg/inits"
+	"github.com/gigamono/gigamono/pkg/logs"
 
-	"github.com/sageflow/sageapi/pkg/server"
+	"github.com/gigamono/gigamono-api/pkg/server"
 )
 
 func main() {

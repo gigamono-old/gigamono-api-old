@@ -5,14 +5,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/sageflow/sageflow/pkg/services/graphql/handlers"
+	"github.com/gigamono/gigamono/pkg/services/graphql/handlers"
 
-	"github.com/sageflow/sageapi/internal/graphql/generated"
-	"github.com/sageflow/sageapi/internal/graphql/resolver"
-	"github.com/sageflow/sageflow/pkg/inits"
-	"github.com/sageflow/sageflow/pkg/services/graphql/directives"
-	"github.com/sageflow/sageflow/pkg/services/graphql/interceptors"
-	proto "github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono-api/internal/graphql/generated"
+	"github.com/gigamono/gigamono-api/internal/graphql/resolver"
+	"github.com/gigamono/gigamono/pkg/inits"
+	"github.com/gigamono/gigamono/pkg/services/graphql/directives"
+	"github.com/gigamono/gigamono/pkg/services/graphql/interceptors"
+	proto "github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
 // Handler handles requests to a graphQL route.

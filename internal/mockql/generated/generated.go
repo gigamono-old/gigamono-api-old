@@ -11,7 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/sageflow/sageapi/internal/mockql/model"
+	"github.com/gigamono/gigamono-api/internal/mockql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -686,7 +686,7 @@ func (ec *executionContext) field_Query_getSessionUser_args(ctx context.Context,
 	var arg0 *model.SessionInput
 	if tmp, ok := rawArgs["session"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
-		arg0, err = ec.unmarshalOSessionInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionInput(ctx, tmp)
+		arg0, err = ec.unmarshalOSessionInput2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐSessionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1068,7 +1068,7 @@ func (ec *executionContext) _Integrations_apps(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.Integration)
 	fc.Result = res
-	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Integrations_builtins(ctx context.Context, field graphql.CollectedField, obj *model.Integrations) (ret graphql.Marshaler) {
@@ -1103,7 +1103,7 @@ func (ec *executionContext) _Integrations_builtins(ctx context.Context, field gr
 	}
 	res := resTmp.([]*model.Integration)
 	fc.Result = res
-	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+	return ec.marshalNIntegration2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LayoutPreferences_activityBarMainShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.LayoutPreferences) (ret graphql.Marshaler) {
@@ -1135,7 +1135,7 @@ func (ec *executionContext) _LayoutPreferences_activityBarMainShortcuts(ctx cont
 	}
 	res := resTmp.([]*model.ShortcutButton)
 	fc.Result = res
-	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
+	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LayoutPreferences_activityBarWorkspaceShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.LayoutPreferences) (ret graphql.Marshaler) {
@@ -1167,7 +1167,7 @@ func (ec *executionContext) _LayoutPreferences_activityBarWorkspaceShortcuts(ctx
 	}
 	res := resTmp.([]*model.ShortcutButton)
 	fc.Result = res
-	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
+	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LayoutPreferences_activityBarOtherShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.LayoutPreferences) (ret graphql.Marshaler) {
@@ -1199,7 +1199,7 @@ func (ec *executionContext) _LayoutPreferences_activityBarOtherShortcuts(ctx con
 	}
 	res := resTmp.([]*model.ShortcutButton)
 	fc.Result = res
-	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
+	return ec.marshalOShortcutButton2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Profile_username(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
@@ -1470,7 +1470,7 @@ func (ec *executionContext) _Project_documents(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.Document)
 	fc.Result = res
-	return ec.marshalNDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, field.Selections, res)
+	return ec.marshalNDocument2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Project_workflows(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
@@ -1505,7 +1505,7 @@ func (ec *executionContext) _Project_workflows(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.Workflow)
 	fc.Result = res
-	return ec.marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
+	return ec.marshalNWorkflow2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProjectFocus_focusWorkflowIndex(ctx context.Context, field graphql.CollectedField, obj *model.ProjectFocus) (ret graphql.Marshaler) {
@@ -1614,7 +1614,7 @@ func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1717,7 +1717,7 @@ func (ec *executionContext) _Session_tokens(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.Tokens)
 	fc.Result = res
-	return ec.marshalOTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx, field.Selections, res)
+	return ec.marshalOTokens2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Session_layout(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
@@ -1752,7 +1752,7 @@ func (ec *executionContext) _Session_layout(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.LayoutPreferences)
 	fc.Result = res
-	return ec.marshalNLayoutPreferences2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐLayoutPreferences(ctx, field.Selections, res)
+	return ec.marshalNLayoutPreferences2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐLayoutPreferences(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Session_focusWorkspaceIndex(ctx context.Context, field graphql.CollectedField, obj *model.Session) (ret graphql.Marshaler) {
@@ -1822,7 +1822,7 @@ func (ec *executionContext) _Session_workspaceFocusIndices(ctx context.Context, 
 	}
 	res := resTmp.([]*model.WorkspaceFocus)
 	fc.Result = res
-	return ec.marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, field.Selections, res)
+	return ec.marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ShortcutButton_iconName(ctx context.Context, field graphql.CollectedField, obj *model.ShortcutButton) (ret graphql.Marshaler) {
@@ -2058,7 +2058,7 @@ func (ec *executionContext) _User_profile(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*model.Profile)
 	fc.Result = res
-	return ec.marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx, field.Selections, res)
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_session(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2090,7 +2090,7 @@ func (ec *executionContext) _User_session(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*model.Session)
 	fc.Result = res
-	return ec.marshalOSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx, field.Selections, res)
+	return ec.marshalOSession2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2122,7 +2122,7 @@ func (ec *executionContext) _User_workspaces(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]*model.Workspace)
 	fc.Result = res
-	return ec.marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, field.Selections, res)
+	return ec.marshalOWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_integrations(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -2154,7 +2154,7 @@ func (ec *executionContext) _User_integrations(ctx context.Context, field graphq
 	}
 	res := resTmp.(*model.Integrations)
 	fc.Result = res
-	return ec.marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, field.Selections, res)
+	return ec.marshalOIntegrations2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
@@ -2393,7 +2393,7 @@ func (ec *executionContext) _Workspace_projects(ctx context.Context, field graph
 	}
 	res := resTmp.([]*model.Project)
 	fc.Result = res
-	return ec.marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, field.Selections, res)
+	return ec.marshalNProject2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _WorkspaceFocus_focusProjectIndex(ctx context.Context, field graphql.CollectedField, obj *model.WorkspaceFocus) (ret graphql.Marshaler) {
@@ -2463,7 +2463,7 @@ func (ec *executionContext) _WorkspaceFocus_projectFocusIndices(ctx context.Cont
 	}
 	res := resTmp.([]*model.ProjectFocus)
 	fc.Result = res
-	return ec.marshalNProjectFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, field.Selections, res)
+	return ec.marshalNProjectFocus2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3563,7 +3563,7 @@ func (ec *executionContext) unmarshalInputSessionInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokens"))
-			it.Tokens, err = ec.unmarshalOTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx, v)
+			it.Tokens, err = ec.unmarshalOTokensInput2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4401,7 +4401,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v []*model.Document) graphql.Marshaler {
+func (ec *executionContext) marshalNDocument2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v []*model.Document) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4425,7 +4425,7 @@ func (ec *executionContext) marshalNDocument2ᚕᚖgithubᚗcomᚋsageflowᚋsag
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalODocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, sel, v[i])
+			ret[i] = ec.marshalODocument2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4453,7 +4453,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v []*model.Integration) graphql.Marshaler {
+func (ec *executionContext) marshalNIntegration2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v []*model.Integration) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4477,7 +4477,7 @@ func (ec *executionContext) marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, sel, v[i])
+			ret[i] = ec.marshalOIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4490,7 +4490,7 @@ func (ec *executionContext) marshalNIntegration2ᚕᚖgithubᚗcomᚋsageflowᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNLayoutPreferences2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐLayoutPreferences(ctx context.Context, sel ast.SelectionSet, v *model.LayoutPreferences) graphql.Marshaler {
+func (ec *executionContext) marshalNLayoutPreferences2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐLayoutPreferences(ctx context.Context, sel ast.SelectionSet, v *model.LayoutPreferences) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4500,7 +4500,7 @@ func (ec *executionContext) marshalNLayoutPreferences2ᚖgithubᚗcomᚋsageflow
 	return ec._LayoutPreferences(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4510,7 +4510,7 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋsageflowᚋsageapi
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v []*model.Project) graphql.Marshaler {
+func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v []*model.Project) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4534,7 +4534,7 @@ func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsage
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, sel, v[i])
+			ret[i] = ec.marshalOProject2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4547,7 +4547,7 @@ func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋsageflowᚋsage
 	return ret
 }
 
-func (ec *executionContext) marshalNProjectFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v []*model.ProjectFocus) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectFocus2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v []*model.ProjectFocus) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4571,7 +4571,7 @@ func (ec *executionContext) marshalNProjectFocus2ᚕᚖgithubᚗcomᚋsageflow�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOProjectFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, sel, v[i])
+			ret[i] = ec.marshalOProjectFocus2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4599,7 +4599,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v []*model.Workflow) graphql.Marshaler {
+func (ec *executionContext) marshalNWorkflow2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v []*model.Workflow) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4623,7 +4623,7 @@ func (ec *executionContext) marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsag
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, sel, v[i])
+			ret[i] = ec.marshalOWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4636,7 +4636,7 @@ func (ec *executionContext) marshalNWorkflow2ᚕᚖgithubᚗcomᚋsageflowᚋsag
 	return ret
 }
 
-func (ec *executionContext) marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v []*model.WorkspaceFocus) graphql.Marshaler {
+func (ec *executionContext) marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v []*model.WorkspaceFocus) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4660,7 +4660,7 @@ func (ec *executionContext) marshalNWorkspaceFocus2ᚕᚖgithubᚗcomᚋsageflow
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOWorkspaceFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, sel, v[i])
+			ret[i] = ec.marshalOWorkspaceFocus2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4926,49 +4926,49 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalODocument2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v *model.Document) graphql.Marshaler {
+func (ec *executionContext) marshalODocument2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐDocument(ctx context.Context, sel ast.SelectionSet, v *model.Document) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Document(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOIntegration2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v *model.Integration) graphql.Marshaler {
+func (ec *executionContext) marshalOIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v *model.Integration) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Integration(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOIntegrations2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v *model.Integrations) graphql.Marshaler {
+func (ec *executionContext) marshalOIntegrations2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐIntegrations(ctx context.Context, sel ast.SelectionSet, v *model.Integrations) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Integrations(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v *model.Project) graphql.Marshaler {
+func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProject(ctx context.Context, sel ast.SelectionSet, v *model.Project) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Project(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOProjectFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v *model.ProjectFocus) graphql.Marshaler {
+func (ec *executionContext) marshalOProjectFocus2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐProjectFocus(ctx context.Context, sel ast.SelectionSet, v *model.ProjectFocus) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ProjectFocus(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOSession2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx context.Context, sel ast.SelectionSet, v *model.Session) graphql.Marshaler {
+func (ec *executionContext) marshalOSession2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐSession(ctx context.Context, sel ast.SelectionSet, v *model.Session) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Session(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSessionInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐSessionInput(ctx context.Context, v interface{}) (*model.SessionInput, error) {
+func (ec *executionContext) unmarshalOSessionInput2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐSessionInput(ctx context.Context, v interface{}) (*model.SessionInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -4976,7 +4976,7 @@ func (ec *executionContext) unmarshalOSessionInput2ᚖgithubᚗcomᚋsageflowᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx context.Context, sel ast.SelectionSet, v []*model.ShortcutButton) graphql.Marshaler {
+func (ec *executionContext) marshalOShortcutButton2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx context.Context, sel ast.SelectionSet, v []*model.ShortcutButton) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5003,7 +5003,7 @@ func (ec *executionContext) marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflow
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOShortcutButton2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, sel, v[i])
+			ret[i] = ec.marshalOShortcutButton2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5016,7 +5016,7 @@ func (ec *executionContext) marshalOShortcutButton2ᚕᚖgithubᚗcomᚋsageflow
 	return ret
 }
 
-func (ec *executionContext) marshalOShortcutButton2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx context.Context, sel ast.SelectionSet, v *model.ShortcutButton) graphql.Marshaler {
+func (ec *executionContext) marshalOShortcutButton2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐShortcutButton(ctx context.Context, sel ast.SelectionSet, v *model.ShortcutButton) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5047,14 +5047,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) marshalOTokens2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx context.Context, sel ast.SelectionSet, v *model.Tokens) graphql.Marshaler {
+func (ec *executionContext) marshalOTokens2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐTokens(ctx context.Context, sel ast.SelectionSet, v *model.Tokens) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Tokens(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOTokensInput2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx context.Context, v interface{}) (*model.TokensInput, error) {
+func (ec *executionContext) unmarshalOTokensInput2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐTokensInput(ctx context.Context, v interface{}) (*model.TokensInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -5062,21 +5062,21 @@ func (ec *executionContext) unmarshalOTokensInput2ᚖgithubᚗcomᚋsageflowᚋs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOWorkflow2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.Workflow) graphql.Marshaler {
+func (ec *executionContext) marshalOWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.Workflow) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Workflow(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v []*model.Workspace) graphql.Marshaler {
+func (ec *executionContext) marshalOWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v []*model.Workspace) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5103,7 +5103,7 @@ func (ec *executionContext) marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsa
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, sel, v[i])
+			ret[i] = ec.marshalOWorkspace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5116,14 +5116,14 @@ func (ec *executionContext) marshalOWorkspace2ᚕᚖgithubᚗcomᚋsageflowᚋsa
 	return ret
 }
 
-func (ec *executionContext) marshalOWorkspace2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v *model.Workspace) graphql.Marshaler {
+func (ec *executionContext) marshalOWorkspace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspace(ctx context.Context, sel ast.SelectionSet, v *model.Workspace) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Workspace(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOWorkspaceFocus2ᚖgithubᚗcomᚋsageflowᚋsageapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v *model.WorkspaceFocus) graphql.Marshaler {
+func (ec *executionContext) marshalOWorkspaceFocus2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋmockqlᚋmodelᚐWorkspaceFocus(ctx context.Context, sel ast.SelectionSet, v *model.WorkspaceFocus) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

@@ -6,9 +6,9 @@ package resolver
 import (
 	"context"
 
-	"github.com/sageflow/sageapi/internal/mockql/generated"
-	"github.com/sageflow/sageapi/internal/mockql/mockdata"
-	"github.com/sageflow/sageapi/internal/mockql/model"
+	"github.com/gigamono/gigamono-api/internal/mockql/generated"
+	"github.com/gigamono/gigamono-api/internal/mockql/mockdata"
+	"github.com/gigamono/gigamono-api/internal/mockql/model"
 )
 
 func (r *queryResolver) GetSessionUser(ctx context.Context, session *model.SessionInput) (*model.User, error) {

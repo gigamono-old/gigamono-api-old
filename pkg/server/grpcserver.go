@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
 func (server *APIServer) grpcServe(listener net.Listener) error {

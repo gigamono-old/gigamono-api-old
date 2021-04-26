@@ -1,7 +1,7 @@
 package mockdata
 
 import (
-	"github.com/sageflow/sageapi/internal/mockql/model"
+	"github.com/gigamono/gigamono-api/internal/mockql/model"
 )
 
 func getDocuments() []*model.Document {

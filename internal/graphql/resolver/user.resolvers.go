@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sageflow/sageapi/internal/graphql/generated"
-	"github.com/sageflow/sageapi/internal/graphql/model"
-	gql "github.com/sageflow/sageflow/pkg/services/graphql"
-	proto "github.com/sageflow/sageflow/pkg/services/proto/generated"
+	"github.com/gigamono/gigamono-api/internal/graphql/generated"
+	"github.com/gigamono/gigamono-api/internal/graphql/model"
+	gql "github.com/gigamono/gigamono/pkg/services/graphql"
+	proto "github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, user model.UserInput) (*model.User, error) {
