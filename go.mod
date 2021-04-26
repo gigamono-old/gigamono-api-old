@@ -8,11 +8,11 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/gigamono/gigamono v0.0.0-20210310195444-994b73c0ab77
+	github.com/gigamono/gigamono v0.0.0-20210426004714-d66ce0dbccc4
 	github.com/soheilhy/cmux v0.1.4
 	github.com/vektah/gqlparser/v2 v2.1.0
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/grpc v1.27.0
 )
 
-replace github.com/gigamono/gigamono v0.0.0-20210310195444-994b73c0ab77 => ../gigamono
+replace github.com/gigamono/gigamono v0.0.0-20210426004714-d66ce0dbccc4 => ../gigamono

@@ -12,25 +12,25 @@ import (
 	"github.com/soheilhy/cmux"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gigamono/gigamono/pkg/inits"
+	"github.com/gin-gonic/gin"
 )
 
 // APIServer represents an new REST-based server instance.
 type APIServer struct {
 	*gin.Engine
 	inits.App
-	Validate            validator.Validate
-	AuthServiceClient   generated.AuthServiceClient
-	EngineServiceClient generated.EngineServiceClient
+	Validate                    validator.Validate
+	AuthServiceClient           generated.AuthServiceClient
+	WorkflowEngineServiceClient generated.WorkflowEngineServiceClient
 }
 
 // NewAPIServer creates a new server instance.
 func NewAPIServer(app inits.App) (APIServer, error) {
 	validate := *validator.New()
 	var (
-		authServiceClient   generated.AuthServiceClient
-		engineServiceClient generated.EngineServiceClient
+		authServiceClient           generated.AuthServiceClient
+		workflowEngineServiceClient generated.WorkflowEngineServiceClient
 	)
 
 	client, err := grpc.GetInsecureServiceClient("localhost", 3002, app.Config)
@@ -44,15 +44,15 @@ func NewAPIServer(app inits.App) (APIServer, error) {
 	if err != nil {
 		logs.FmtPrintln("initialising API server: unable to connect to Engine Service:", err)
 	} else {
-		engineServiceClient = client.(generated.EngineServiceClient)
+		workflowEngineServiceClient = client.(generated.WorkflowEngineServiceClient)
 	}
 
 	return APIServer{
-		Engine:              gin.Default(),
-		App:                 app,
-		Validate:            validate,
-		AuthServiceClient:   authServiceClient,
-		EngineServiceClient: engineServiceClient,
+		Engine:                      gin.Default(),
+		App:                         app,
+		Validate:                    validate,
+		AuthServiceClient:           authServiceClient,
+		WorkflowEngineServiceClient: workflowEngineServiceClient,
 	}, nil
 }
 

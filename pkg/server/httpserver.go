@@ -20,7 +20,7 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := mockql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.EngineServiceClient)
+	graphqlHandler := mockql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.WorkflowEngineServiceClient)
 	playgroundHandler := mockql.PlaygroundHandler()
 
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.

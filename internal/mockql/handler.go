@@ -14,14 +14,19 @@ import (
 )
 
 // Handler handles requests to a graphQL route.
-func Handler(app *inits.App, validate *validator.Validate, authService proto.AuthServiceClient, engineService proto.EngineServiceClient) gin.HandlerFunc {
+func Handler(
+	app *inits.App,
+	validate *validator.Validate,
+	authService proto.AuthServiceClient,
+	workflowEngineService proto.WorkflowEngineServiceClient,
+) gin.HandlerFunc {
 	// Initialize handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
-			App:           app,
-			AuthService:   authService,
-			EngineService: engineService,
-			Validate:      validate,
+			App:                   app,
+			AuthService:           authService,
+			WorkflowEngineService: workflowEngineService,
+			Validate:              validate,
 		},
 	}))
 
