@@ -1,5 +1,0 @@
-type Workflow {
-  name: String!
-  id: String!
-  specification: String
-}

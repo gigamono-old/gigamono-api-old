@@ -1,7 +1,0 @@
-type User {
-  id: String!
-  profile: Profile!
-  session: Session
-  workspaces: [Workspace]
-  integrations: Integrations
-}

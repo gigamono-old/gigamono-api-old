@@ -1,7 +1,0 @@
-type Profile {
-  username: String!
-  email: String!
-  firstName: String
-  lastName: String
-  avatar32URL: String
-}

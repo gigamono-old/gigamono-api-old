@@ -1,9 +1,0 @@
-type Tokens {
-  accessToken: String!
-  csrfToken: String!
-}
-
-input TokensInput {
-  accessToken: String!
-  csrfToken: String!
-}

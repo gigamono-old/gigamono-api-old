@@ -1,8 +1,0 @@
-type Project {
-    name: String!
-    id: String!
-    documents: [Document]!
-    workflows: [Workflow]!
-}
-
-

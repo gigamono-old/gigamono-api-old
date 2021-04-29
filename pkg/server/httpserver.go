@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/contrib/static"
-	"github.com/gigamono/gigamono-api/internal/mockql"
+	"github.com/gigamono/gigamono-api/internal/graphql"
 )
 
 func (server *APIServer) httpServe(listener net.Listener) error {
@@ -20,8 +20,8 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := mockql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.WorkflowEngineServiceClient)
-	playgroundHandler := mockql.PlaygroundHandler()
+	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.WorkflowEngineServiceClient)
+	playgroundHandler := graphql.PlaygroundHandler()
 
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.
 	server.Use(static.Serve("/avatars", static.LocalFile("./avatars", true))) // Serves avatar images.

@@ -5,14 +5,14 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/gigamono/gigamono-api/internal/mockql/generated"
-	"github.com/gigamono/gigamono-api/internal/mockql/mockdata"
-	"github.com/gigamono/gigamono-api/internal/mockql/model"
+	"github.com/gigamono/gigamono-api/internal/graphql/generated"
+	"github.com/gigamono/gigamono-api/internal/graphql/model"
 )
 
-func (r *queryResolver) GetSessionUser(ctx context.Context, session *model.SessionInput) (*model.User, error) {
-	return mockdata.GetSessionUser(), nil
+func (r *queryResolver) GetSessionUser(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -18,8 +18,8 @@ import (
 
 // APIServer represents an new REST-based server instance.
 type APIServer struct {
-	*gin.Engine
 	inits.App
+	*gin.Engine
 	Validate                    validator.Validate
 	AuthServiceClient           generated.AuthServiceClient
 	WorkflowEngineServiceClient generated.WorkflowEngineServiceClient
@@ -48,8 +48,8 @@ func NewAPIServer(app inits.App) (APIServer, error) {
 	}
 
 	return APIServer{
-		Engine:                      gin.Default(),
 		App:                         app,
+		Engine:                      gin.Default(),
 		Validate:                    validate,
 		AuthServiceClient:           authServiceClient,
 		WorkflowEngineServiceClient: workflowEngineServiceClient,

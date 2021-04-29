@@ -3,9 +3,9 @@ package graphql
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gigamono/gigamono/pkg/services/graphql/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/gigamono/gigamono/pkg/services/graphql/handlers"
 
 	"github.com/gigamono/gigamono-api/internal/graphql/generated"
 	"github.com/gigamono/gigamono-api/internal/graphql/resolver"
@@ -16,14 +16,19 @@ import (
 )
 
 // Handler handles requests to a graphQL route.
-func Handler(app *inits.App, validate *validator.Validate, authService proto.AuthServiceClient, engineService proto.EngineServiceClient) gin.HandlerFunc {
+func Handler(
+	app *inits.App,
+	validate *validator.Validate,
+	authService proto.AuthServiceClient,
+	workflowEngineService proto.WorkflowEngineServiceClient,
+) gin.HandlerFunc {
 	// Initialize handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
-			App:           app,
-			AuthService:   authService,
-			EngineService: engineService,
-			Validate:      validate,
+			App:                   app,
+			AuthService:           authService,
+			WorkflowEngineService: workflowEngineService,
+			Validate:              validate,
 		},
 		Directives: generated.DirectiveRoot{
 			Tag: directives.Tag,
