@@ -20,15 +20,13 @@ func Handler(
 	app *inits.App,
 	validate *validator.Validate,
 	authService proto.AuthServiceClient,
-	workflowEngineService proto.WorkflowEngineServiceClient,
 ) gin.HandlerFunc {
 	// Initialize handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
-			App:                   app,
-			AuthService:           authService,
-			WorkflowEngineService: workflowEngineService,
-			Validate:              validate,
+			App:         app,
+			AuthService: authService,
+			Validate:    validate,
 		},
 		Directives: generated.DirectiveRoot{
 			Tag: directives.Tag,

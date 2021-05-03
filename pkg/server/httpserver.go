@@ -4,8 +4,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gigamono/gigamono-api/internal/graphql"
+	"github.com/gin-gonic/contrib/static"
 )
 
 func (server *APIServer) httpServe(listener net.Listener) error {
@@ -20,7 +20,7 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient, server.WorkflowEngineServiceClient)
+	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient)
 	playgroundHandler := graphql.PlaygroundHandler()
 
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.

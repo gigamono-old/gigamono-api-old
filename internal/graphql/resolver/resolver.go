@@ -11,6 +11,5 @@ import (
 type Resolver struct {
 	*inits.App
 	AuthService           proto.AuthServiceClient
-	WorkflowEngineService proto.WorkflowEngineServiceClient
 	Validate              *validator.Validate
 }

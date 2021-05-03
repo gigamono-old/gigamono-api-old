@@ -10,6 +10,18 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
+type SessionUser struct {
+	ID     string  `json:"id" `
+	Tokens *Tokens `json:"tokens" `
+}
+type Tokens struct {
+	AccessToken   string `json:"AccessToken" `
+	RefereshToken string `json:"RefereshToken" `
+}
+type TokensInput struct {
+	AccessToken   string `json:"AccessToken" `
+	RefereshToken string `json:"RefereshToken" `
+}
 type User struct {
 	ID string `json:"id" `
 }

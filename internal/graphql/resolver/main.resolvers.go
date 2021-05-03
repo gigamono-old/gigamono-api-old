@@ -5,14 +5,14 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/gigamono/gigamono-api/internal/crud"
 	"github.com/gigamono/gigamono-api/internal/graphql/generated"
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
 )
 
-func (r *queryResolver) GetSessionUser(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetSessionUser(ctx context.Context, tokens model.TokensInput) (*model.SessionUser, error) {
+	return crud.GetSessionUser(ctx, tokens)
 }
 
 // Query returns generated.QueryResolver implementation.

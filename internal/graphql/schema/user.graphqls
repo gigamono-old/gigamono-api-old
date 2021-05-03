@@ -3,3 +3,8 @@ directive @tag(validate: String) on INPUT_FIELD_DEFINITION
 type User {
   id: String!
 }
+
+type SessionUser {
+  id: String!
+  tokens: Tokens!
+}

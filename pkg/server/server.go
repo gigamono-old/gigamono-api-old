@@ -20,39 +20,27 @@ import (
 type APIServer struct {
 	inits.App
 	*gin.Engine
-	Validate                    validator.Validate
-	AuthServiceClient           generated.AuthServiceClient
-	WorkflowEngineServiceClient generated.WorkflowEngineServiceClient
+	Validate          validator.Validate
+	AuthServiceClient generated.AuthServiceClient
 }
 
 // NewAPIServer creates a new server instance.
 func NewAPIServer(app inits.App) (APIServer, error) {
 	validate := *validator.New()
-	var (
-		authServiceClient           generated.AuthServiceClient
-		workflowEngineServiceClient generated.WorkflowEngineServiceClient
-	)
+	var authServiceClient generated.AuthServiceClient
 
-	client, err := grpc.GetInsecureServiceClient("localhost", 3002, app.Config)
+	client, err := grpc.GetInsecureServiceClient("localhost", 3001, app.Config)
 	if err != nil {
 		logs.FmtPrintln("initialising API server: unable to connect to Auth Service:", err)
 	} else {
 		authServiceClient = client.(generated.AuthServiceClient)
 	}
 
-	client, err = grpc.GetInsecureServiceClient("localhost", 3001, app.Config)
-	if err != nil {
-		logs.FmtPrintln("initialising API server: unable to connect to Engine Service:", err)
-	} else {
-		workflowEngineServiceClient = client.(generated.WorkflowEngineServiceClient)
-	}
-
 	return APIServer{
-		App:                         app,
-		Engine:                      gin.Default(),
-		Validate:                    validate,
-		AuthServiceClient:           authServiceClient,
-		WorkflowEngineServiceClient: workflowEngineServiceClient,
+		App:               app,
+		Engine:            gin.Default(),
+		Validate:          validate,
+		AuthServiceClient: authServiceClient,
 	}, nil
 }
 
