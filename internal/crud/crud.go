@@ -11,13 +11,10 @@ import (
 // GetSessionUser get the session user main details.
 func GetSessionUser(ctx context.Context, tokens model.TokensInput) (*model.SessionUser, error) {
 	// TODO: Sec: Validation, Auth, Permission.
-	id, err := auth.GetSessionUserID(auth.Tokens{
-		tokens.AccessToken,
-		tokens.RefereshToken,
-	})
+	id, err := auth.GetSessionUserID(auth.Tokens(tokens))
 
 	if err != nil {
-		return &model.SessionUser{}, fmt.Errorf("Unable to authenticate user: %v", err)
+		return &model.SessionUser{}, fmt.Errorf("unable to authenticate user: %v", err)
 	}
 
 	return &model.SessionUser{

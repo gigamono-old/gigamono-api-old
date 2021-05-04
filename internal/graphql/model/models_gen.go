@@ -15,12 +15,12 @@ type SessionUser struct {
 	Tokens *Tokens `json:"tokens" `
 }
 type Tokens struct {
-	AccessToken   string `json:"AccessToken" `
-	RefereshToken string `json:"RefereshToken" `
+	AccessToken  string `json:"accessToken" `
+	RefreshToken string `json:"refreshToken" `
 }
 type TokensInput struct {
-	AccessToken   string `json:"AccessToken" `
-	RefereshToken string `json:"RefereshToken" `
+	AccessToken  string `json:"accessToken" `
+	RefreshToken string `json:"refreshToken" `
 }
 type User struct {
 	ID string `json:"id" `

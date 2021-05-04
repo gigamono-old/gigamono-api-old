@@ -53,8 +53,8 @@ type ComplexityRoot struct {
 	}
 
 	Tokens struct {
-		AccessToken   func(childComplexity int) int
-		RefereshToken func(childComplexity int) int
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
 	}
 
 	User struct {
@@ -107,19 +107,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SessionUser.Tokens(childComplexity), true
 
-	case "Tokens.AccessToken":
+	case "Tokens.accessToken":
 		if e.complexity.Tokens.AccessToken == nil {
 			break
 		}
 
 		return e.complexity.Tokens.AccessToken(childComplexity), true
 
-	case "Tokens.RefereshToken":
-		if e.complexity.Tokens.RefereshToken == nil {
+	case "Tokens.refreshToken":
+		if e.complexity.Tokens.RefreshToken == nil {
 			break
 		}
 
-		return e.complexity.Tokens.RefereshToken(childComplexity), true
+		return e.complexity.Tokens.RefreshToken(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -194,13 +194,13 @@ type SessionUser {
 }
 `, BuiltIn: false},
 	{Name: "../gigamono/pkg/services/graphql/schema/tokens.graphqls", Input: `type Tokens {
-    AccessToken: String!
-    RefereshToken: String!
+    accessToken: String!
+    refreshToken: String!
 }
 
 input TokensInput {
-    AccessToken: String!
-    RefereshToken: String!
+    accessToken: String!
+    refreshToken: String!
 }
 `, BuiltIn: false},
 }
@@ -476,7 +476,7 @@ func (ec *executionContext) _SessionUser_tokens(ctx context.Context, field graph
 	return ec.marshalNTokens2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐTokens(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Tokens_AccessToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
+func (ec *executionContext) _Tokens_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -511,7 +511,7 @@ func (ec *executionContext) _Tokens_AccessToken(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Tokens_RefereshToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
+func (ec *executionContext) _Tokens_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.Tokens) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -529,7 +529,7 @@ func (ec *executionContext) _Tokens_RefereshToken(ctx context.Context, field gra
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RefereshToken, nil
+		return obj.RefreshToken, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1674,19 +1674,19 @@ func (ec *executionContext) unmarshalInputTokensInput(ctx context.Context, obj i
 
 	for k, v := range asMap {
 		switch k {
-		case "AccessToken":
+		case "accessToken":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("AccessToken"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessToken"))
 			it.AccessToken, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "RefereshToken":
+		case "refreshToken":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("RefereshToken"))
-			it.RefereshToken, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
+			it.RefreshToken, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1791,13 +1791,13 @@ func (ec *executionContext) _Tokens(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Tokens")
-		case "AccessToken":
-			out.Values[i] = ec._Tokens_AccessToken(ctx, field, obj)
+		case "accessToken":
+			out.Values[i] = ec._Tokens_accessToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "RefereshToken":
-			out.Values[i] = ec._Tokens_RefereshToken(ctx, field, obj)
+		case "refreshToken":
+			out.Values[i] = ec._Tokens_refreshToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
