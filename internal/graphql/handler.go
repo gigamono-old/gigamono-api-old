@@ -19,14 +19,14 @@ import (
 func Handler(
 	app *inits.App,
 	validate *validator.Validate,
-	authService proto.AuthServiceClient,
+	authClient proto.AuthClient,
 ) gin.HandlerFunc {
 	// Initialize handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
-			App:         app,
-			AuthService: authService,
-			Validate:    validate,
+			App:        app,
+			AuthClient: authClient,
+			Validate:   validate,
 		},
 		Directives: generated.DirectiveRoot{
 			Tag: directives.Tag,

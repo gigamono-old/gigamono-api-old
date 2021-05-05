@@ -15,7 +15,7 @@ func (server *APIServer) grpcServe(listener net.Listener) error {
 	grpcServer := grpc.NewServer() // Create a gRPC server.
 
 	// Register gRPC service.
-	generated.RegisterAPIServiceServer(grpcServer, server)
+	generated.RegisterAPIServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
 	return grpcServer.Serve(listener) // Listen for requests.

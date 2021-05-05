@@ -20,27 +20,28 @@ import (
 type APIServer struct {
 	inits.App
 	*gin.Engine
-	Validate          validator.Validate
-	AuthServiceClient generated.AuthServiceClient
+	Validate   validator.Validate
+	AuthClient generated.AuthClient
 }
 
 // NewAPIServer creates a new server instance.
 func NewAPIServer(app inits.App) (APIServer, error) {
 	validate := *validator.New()
-	var authServiceClient generated.AuthServiceClient
+	var authClient generated.AuthClient
 
-	client, err := grpc.GetInsecureServiceClient("localhost", 3001, app.Config)
+	// TODO: Sec: Insecure connection.
+	client, err := grpc.GetInsecureClient("localhost", app.Config.Services.Types.Auth.Port, app.Config)
 	if err != nil {
 		logs.FmtPrintln("initialising API server: unable to connect to Auth Service:", err)
 	} else {
-		authServiceClient = client.(generated.AuthServiceClient)
+		authClient = client.(generated.AuthClient)
 	}
 
 	return APIServer{
-		App:               app,
-		Engine:            gin.Default(),
-		Validate:          validate,
-		AuthServiceClient: authServiceClient,
+		App:        app,
+		Engine:     gin.Default(),
+		Validate:   validate,
+		AuthClient: authClient,
 	}, nil
 }
 

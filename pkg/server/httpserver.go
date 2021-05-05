@@ -20,7 +20,7 @@ func (server *APIServer) httpServe(listener net.Listener) error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthServiceClient)
+	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthClient)
 	playgroundHandler := graphql.PlaygroundHandler()
 
 	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.
