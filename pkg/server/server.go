@@ -32,7 +32,7 @@ func NewAPIServer(app inits.App) (APIServer, error) {
 	// TODO: Sec: Insecure connection.
 	client, err := grpc.GetInsecureClient("localhost", app.Config.Services.Types.Auth.Port, app.Config)
 	if err != nil {
-		logs.FmtPrintln("initialising API server: unable to connect to Auth Service:", err)
+		logs.FmtPrintln("initialising api server: unable to connect to Auth Service:", err)
 	} else {
 		authClient = client.(generated.AuthClient)
 	}

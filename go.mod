@@ -4,9 +4,9 @@ go 1.15
 
 require (
 	github.com/99designs/gqlgen v0.13.0
-	github.com/gigamono/gigamono v0.0.0-20210426004714-d66ce0dbccc4
+	github.com/gigamono/gigamono v0.0.0-20210505114150-59066b8b3792
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/soheilhy/cmux v0.1.4
 	github.com/vektah/gqlparser/v2 v2.1.0
@@ -14,4 +14,4 @@ require (
 	google.golang.org/grpc v1.27.0
 )
 
-replace github.com/gigamono/gigamono v0.0.0-20210426004714-d66ce0dbccc4 => ../gigamono
+replace github.com/gigamono/gigamono v0.0.0-20210505114150-59066b8b3792 => ../gigamono

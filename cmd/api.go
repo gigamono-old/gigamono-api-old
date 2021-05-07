@@ -11,19 +11,19 @@ func main() {
 	// Initialises app.
 	app, err := inits.NewApp("Resource")
 	if err != nil {
-		logs.FmtPrintln("Unable to initialize api:", err)
+		logs.FmtPrintln("initialising api:", err)
 		return
 	}
 
 	// Start an API gRPC server.
 	server, err := server.NewAPIServer(app)
 	if err != nil {
-		logs.FmtPrintln("Unable to initialize server:", err)
+		logs.FmtPrintln("initialising server:", err)
 		return
 	}
 
 	// Listen on specified port.
 	if err := server.Listen(); err != nil {
-		logs.FmtPrintln("Unable to listen on port specified:", err)
+		logs.FmtPrintln("trying to listen on port specified:", err)
 	}
 }

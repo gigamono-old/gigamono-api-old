@@ -3,7 +3,6 @@ package graphql
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/gigamono/gigamono/pkg/services/graphql/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/gigamono/gigamono-api/internal/graphql/resolver"
 	"github.com/gigamono/gigamono/pkg/inits"
 	"github.com/gigamono/gigamono/pkg/services/graphql/directives"
-	"github.com/gigamono/gigamono/pkg/services/graphql/interceptors"
+	"github.com/gigamono/gigamono/pkg/services/graphql/middleware"
 	proto "github.com/gigamono/gigamono/pkg/services/proto/generated"
 )
 
@@ -34,8 +33,8 @@ func Handler(
 	}))
 
 	// Add middlewares.
-	handler.Use(interceptors.ErrorModifier{})
-	handler.SetRecoverFunc(handlers.PanicHandler)
+	handler.Use(middleware.ErrorModifier{})
+	handler.SetRecoverFunc(middleware.PanicHandler)
 
 	return func(ctx *gin.Context) {
 		// Sec: Responses escaped by json.Marshal so there is some protection against XSS.
