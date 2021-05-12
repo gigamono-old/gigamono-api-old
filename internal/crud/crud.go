@@ -6,13 +6,13 @@ import (
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
 	"github.com/gigamono/gigamono/pkg/errs"
 	"github.com/gigamono/gigamono/pkg/messages"
-	"github.com/gigamono/gigamono/pkg/services/auth"
+	"github.com/gigamono/gigamono/pkg/services/session"
 )
 
 // GetSessionUser get the session user main details.
 func GetSessionUser(_ context.Context, tokens model.TokensInput) (*model.SessionUser, error) {
 	// TODO: Sec: Validation, Auth, Permission.
-	id, err := auth.GetSessionUserID(auth.Tokens(tokens))
+	id, err := session.GetSessionUser(session.Tokens(tokens))
 	if err != nil {
 		panic(errs.NewSystemError(
 			messages.Error["user-auth"].(string),

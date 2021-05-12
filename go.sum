@@ -68,6 +68,8 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/gigamono/gigamono v0.0.0-20210430110950-d1564ceebb39 h1:Hrt50lwBj6ErdCXm6sBxO2sui9SKLtU/Hc7WcW+4GXA=
 github.com/gigamono/gigamono v0.0.0-20210505114150-59066b8b3792 h1:iZu86EA2E8qdHi0LLkWOJ/qY7bmbx2t2gCTzvF6JgqY=
 github.com/gigamono/gigamono v0.0.0-20210505114150-59066b8b3792/go.mod h1:Vzasb6KlOdTbLT2ijtpkVydvwNgAsFCK5I5ITudGjIA=
+github.com/gigamono/gigamono v0.0.0-20210510234020-a879327fc4e6 h1:AzLQggdEdBPTUyrWRaVhMG5dySEvWN9UCFbHNerc/AE=
+github.com/gigamono/gigamono v0.0.0-20210510234020-a879327fc4e6/go.mod h1:Skf8axPY/aXctTu6o8T4zJ3Mjzsf4ZtFemJnc6Giwck=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19 h1:J2LPEOcQmWaooBnBtUDV9KHFEnP5LYTZY03GiQ0oQBw=
