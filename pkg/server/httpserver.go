@@ -12,7 +12,7 @@ import (
 func (server *APIServer) httpServe() error {
 	listener, err := net.Listen(
 		"tcp",
-		fmt.Sprint(":", server.Config.Services.Types.API.PublicPort),
+		fmt.Sprint(":", server.Config.Services.API.Ports.Public),
 	)
 	if err != nil {
 		return err

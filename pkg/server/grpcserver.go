@@ -14,7 +14,7 @@ import (
 func (server *APIServer) grpcServe() error {
 	listener, err := net.Listen(
 		"tcp",
-		fmt.Sprint(":", server.Config.Services.Types.API.PrivatePort),
+		fmt.Sprint(":", server.Config.Services.API.Ports.Private),
 	)
 	if err != nil {
 		return err
