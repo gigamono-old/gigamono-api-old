@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gigamono/gigamono-api/internal/graphql"
+	"github.com/gigamono/gigamono/pkg/configs"
+	"github.com/gigamono/gigamono/pkg/services/rest/middleware"
 	"github.com/gin-gonic/contrib/static"
 )
 
@@ -29,12 +31,19 @@ func (server *APIServer) httpServe() error {
 }
 
 func (server *APIServer) setRoutes() {
-	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthClient)
-	playgroundHandler := graphql.PlaygroundHandler()
+	// Serve home static files.
+	server.Use(static.Serve("/", static.LocalFile("../gigamono-ui/dist", true)))
 
-	server.Use(static.Serve("/", static.LocalFile("../sageui/dist", true)))   // Serves files.
-	server.Use(static.Serve("/avatars", static.LocalFile("./avatars", true))) // Serves avatar images.
-	server.POST("/graphql", graphqlHandler)                                   // Handles all graphql requests.
-	server.GET("/graphql", graphqlHandler)                                    // Handles query-only graphql requests.
-	server.GET("/playground", playgroundHandler)                              // Shows playground UI.
+	// Depending on service config, create a local static folder for serving workflow files.
+	if server.Config.Filestore.Workflow.Kind == configs.Local {
+		// TODO: Permission middleware.
+		// Authenticate session user.
+		workflowStaticRoute := server.Group("/workflow", middleware.Authenticate(&server.App))
+		workflowStaticRoute.StaticFS("/", http.Dir(server.Config.Filestore.Workflow.Path))
+	}
+
+	// GraphQL handlers.
+	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthClient)
+	server.POST("/graphql", graphqlHandler) // Handles all graphql requests.
+	server.GET("/graphql", graphqlHandler)  // Handles query-only graphql requests.
 }
