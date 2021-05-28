@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
@@ -41,14 +40,6 @@ func Handler(
 		// - https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/graphql/handler/server.go#L101
 		// - https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/graphql/handler/transport/util.go#L13
 		// - https://github.com/golang/go/blob/a7526bbf72dfe0fde00d88f85fd6cddccdb3a345/src/encoding/json/encode.go#L194
-		handler.ServeHTTP(ctx.Writer, ctx.Request)
-	}
-}
-
-// PlaygroundHandler handles requests to a graphql route.
-func PlaygroundHandler() gin.HandlerFunc {
-	handler := playground.Handler("GraphQL", "/graphql") // Docs can be found at the /query
-	return func(ctx *gin.Context) {
 		handler.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 }
