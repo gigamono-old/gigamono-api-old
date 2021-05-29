@@ -6,8 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gigamono/gigamono-api/internal/graphql"
-	"github.com/gigamono/gigamono/pkg/configs"
-	"github.com/gigamono/gigamono/pkg/services/rest/middleware"
+	"github.com/gigamono/gigamono/pkg/services/rest"
 	"github.com/gin-gonic/contrib/static"
 )
 
@@ -34,13 +33,8 @@ func (server *APIServer) setRoutes() {
 	// Serve home static files.
 	server.Use(static.Serve("/", static.LocalFile("../gigamono-ui/dist", true)))
 
-	// Depending on service config, create a local static folder for serving workflow files.
-	if server.Config.Filestore.Workflow.Kind == configs.Local {
-		// TODO: Permission middleware.
-		// Authenticate session user.
-		workflowStaticRoute := server.Group("/workflow", middleware.Authenticate(&server.App))
-		workflowStaticRoute.StaticFS("/", http.Dir(server.Config.Filestore.Workflow.Path))
-	}
+	// Set local static routes if specified.
+	rest.SetLocalStaticRoutes(server.Engine, &server.App)
 
 	// GraphQL handlers.
 	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthClient)
