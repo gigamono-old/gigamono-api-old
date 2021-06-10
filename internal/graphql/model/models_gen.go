@@ -10,20 +10,24 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
+type Integration struct {
+	ID            string `json:"id" `
+	Name          string `json:"name" `
+	Specification string `json:"specification" `
+	CreatorID     string `json:"creatorID" `
+}
 type SessionUser struct {
-	ID     string  `json:"id" `
-	Tokens *Tokens `json:"tokens" `
-}
-type Tokens struct {
-	AccessToken  string `json:"accessToken" `
-	RefreshToken string `json:"refreshToken" `
-}
-type TokensInput struct {
-	AccessToken  string `json:"accessToken" `
-	RefreshToken string `json:"refreshToken" `
+	ID string `json:"id" `
 }
 type User struct {
 	ID string `json:"id" `
+}
+type Workflow struct {
+	ID            string `json:"id" `
+	Name          string `json:"name" `
+	IsActive      string `json:"isActive" `
+	Specification string `json:"specification" `
+	CreatorID     string `json:"creatorID" `
 }
 type Directive struct {
 	Name        string                      `json:"name" `

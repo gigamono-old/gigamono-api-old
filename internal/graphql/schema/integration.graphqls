@@ -1,0 +1,6 @@
+type Integration {
+  id: String!
+  name: String!
+  specification: String!
+  creatorID: String!
+}

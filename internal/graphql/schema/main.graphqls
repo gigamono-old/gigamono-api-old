@@ -1,3 +1,18 @@
+scalar Upload
+
 type Query {
-  getSessionUser(tokens: TokensInput!): SessionUser!
+  getSessionUser: SessionUser!
+  getIntegration(id: String!): Integration!
 }
+
+type Mutation {
+  # Integration
+  createIntegration(specification: String!): Integration!
+  uploadIntegrationAvatar(id: String!, file: Upload!): Integration!
+  patchIntegrationSpecification(id: String!, patch: String!): Integration!
+
+  # Workflow
+  createWorkflow(specification: String!): Workflow!
+  patchWorkflowSpecification(id: String!, patch: String!): Workflow
+}
+
