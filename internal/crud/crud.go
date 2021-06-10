@@ -4,22 +4,15 @@ import (
 	"context"
 
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
+	"github.com/gigamono/gigamono/pkg/services/rest/middleware"
 )
 
 // GetSessionUser get the session user main details.
-func GetSessionUser(_ context.Context, tokens model.TokensInput) (*model.SessionUser, error) {
-	// TODO: Sec: Validation, Auth, Permission.
-	// id, err := session.GetSessionUser(session.Tokens(tokens))
-	// if err != nil {
-	// 	panic(errs.NewSystemError(
-	// 		messages.Error["user-auth"].(string),
-	// 		"authenticating user",
-	// 		err,
-	// 	))
-	// }
+func GetSessionUser(ctx context.Context) (*model.SessionUser, error) {
+	// TODO: Sec: Validation.
+	userID := ctx.Value(middleware.SessionDataKey).(middleware.SessionData).Claims.Subject
 
 	return &model.SessionUser{
-		// ID:     id.String(),
-		Tokens: &model.Tokens{},
+		ID: userID,
 	}, nil
 }

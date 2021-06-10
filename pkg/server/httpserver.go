@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gigamono/gigamono-api/internal/graphql"
-	"github.com/gigamono/gigamono/pkg/services/rest"
+	"github.com/gigamono/gigamono/pkg/services/rest/middleware"
+	"github.com/gigamono/gigamono/pkg/services/rest/routes"
 	"github.com/gin-gonic/contrib/static"
 )
 
@@ -34,10 +35,13 @@ func (server *APIServer) setRoutes() {
 	server.Use(static.Serve("/", static.LocalFile("../gigamono-ui/dist", true)))
 
 	// Set local static routes if specified.
-	rest.SetLocalStaticRoutes(server.Engine, &server.App)
+	routes.SetLocalStaticRoutes(server.Engine, &server.App)
 
-	// GraphQL handlers.
+	// GraphQL handler.
 	graphqlHandler := graphql.Handler(&server.App, &server.Validate, server.AuthClient)
-	server.POST("/graphql", graphqlHandler) // Handles all graphql requests.
-	server.GET("/graphql", graphqlHandler)  // Handles query-only graphql requests.
+	graphqlRoute := server.Group("/graphql", middleware.AuthenticateCreateUser(&server.App))
+	{
+		graphqlRoute.POST("/", graphqlHandler) // Handles all graphql requests.
+		graphqlRoute.GET("/", graphqlHandler)  // Handles query-only graphql requests.
+	}
 }
