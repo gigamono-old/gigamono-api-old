@@ -1,14 +1,16 @@
 scalar Upload
+scalar Void
 
 type Query {
   getSessionUser: SessionUser!
   getIntegration(id: String!): Integration!
+  getWorkflow(id: String!): Workflow!
 }
 
 type Mutation {
   # Integration
   createIntegration(specification: String!): Integration!
-  uploadIntegrationAvatar(id: String!, file: Upload!): Integration!
+  uploadIntegrationAvatar(id: String!, file: Upload!): Void
   patchIntegrationSpecification(id: String!, patch: String!): Integration!
 
   # Workflow

@@ -14,11 +14,11 @@ import (
 )
 
 func (r *mutationResolver) CreateIntegration(ctx context.Context, specification string) (*model.Integration, error) {
-	panic(fmt.Errorf("not implemented"))
+	return crud.CreateIntegration(ctx, r.App, specification)
 }
 
-func (r *mutationResolver) UploadIntegrationAvatar(ctx context.Context, id string, file graphql.Upload) (*model.Integration, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) UploadIntegrationAvatar(ctx context.Context, id string, file graphql.Upload) (*string, error) {
+	return crud.UploadIntegrationAvatar(ctx, r.App, id, file)
 }
 
 func (r *mutationResolver) PatchIntegrationSpecification(ctx context.Context, id string, patch string) (*model.Integration, error) {
@@ -26,7 +26,7 @@ func (r *mutationResolver) PatchIntegrationSpecification(ctx context.Context, id
 }
 
 func (r *mutationResolver) CreateWorkflow(ctx context.Context, specification string) (*model.Workflow, error) {
-	panic(fmt.Errorf("not implemented"))
+	return crud.CreateWorkflow(ctx, r.App, specification)
 }
 
 func (r *mutationResolver) PatchWorkflowSpecification(ctx context.Context, id string, patch string) (*model.Workflow, error) {
@@ -38,6 +38,10 @@ func (r *queryResolver) GetSessionUser(ctx context.Context) (*model.SessionUser,
 }
 
 func (r *queryResolver) GetIntegration(ctx context.Context, id string) (*model.Integration, error) {
+	return crud.GetIntegration(ctx, r.App, id)
+}
+
+func (r *queryResolver) GetWorkflow(ctx context.Context, id string) (*model.Workflow, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

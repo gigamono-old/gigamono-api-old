@@ -1,7 +1,0 @@
-type Workflow {
-  id: String!
-  name: String!
-  isActive: String!
-  specification: String!
-  creatorID: String!
-}

@@ -45,10 +45,11 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Integration struct {
-		CreatorID     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Name          func(childComplexity int) int
-		Specification func(childComplexity int) int
+		CreatorID         func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Specification     func(childComplexity int) int
+		SpecificationPath func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -62,6 +63,7 @@ type ComplexityRoot struct {
 	Query struct {
 		GetIntegration func(childComplexity int, id string) int
 		GetSessionUser func(childComplexity int) int
+		GetWorkflow    func(childComplexity int, id string) int
 	}
 
 	SessionUser struct {
@@ -73,17 +75,18 @@ type ComplexityRoot struct {
 	}
 
 	Workflow struct {
-		CreatorID     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		IsActive      func(childComplexity int) int
-		Name          func(childComplexity int) int
-		Specification func(childComplexity int) int
+		CreatorID         func(childComplexity int) int
+		ID                func(childComplexity int) int
+		IsActive          func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Specification     func(childComplexity int) int
+		SpecificationPath func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	CreateIntegration(ctx context.Context, specification string) (*model.Integration, error)
-	UploadIntegrationAvatar(ctx context.Context, id string, file graphql.Upload) (*model.Integration, error)
+	UploadIntegrationAvatar(ctx context.Context, id string, file graphql.Upload) (*string, error)
 	PatchIntegrationSpecification(ctx context.Context, id string, patch string) (*model.Integration, error)
 	CreateWorkflow(ctx context.Context, specification string) (*model.Workflow, error)
 	PatchWorkflowSpecification(ctx context.Context, id string, patch string) (*model.Workflow, error)
@@ -91,6 +94,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	GetSessionUser(ctx context.Context) (*model.SessionUser, error)
 	GetIntegration(ctx context.Context, id string) (*model.Integration, error)
+	GetWorkflow(ctx context.Context, id string) (*model.Workflow, error)
 }
 
 type executableSchema struct {
@@ -135,6 +139,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Integration.Specification(childComplexity), true
+
+	case "Integration.specificationPath":
+		if e.complexity.Integration.SpecificationPath == nil {
+			break
+		}
+
+		return e.complexity.Integration.SpecificationPath(childComplexity), true
 
 	case "Mutation.createIntegration":
 		if e.complexity.Mutation.CreateIntegration == nil {
@@ -215,6 +226,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetSessionUser(childComplexity), true
 
+	case "Query.getWorkflow":
+		if e.complexity.Query.GetWorkflow == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getWorkflow_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetWorkflow(childComplexity, args["id"].(string)), true
+
 	case "SessionUser.id":
 		if e.complexity.SessionUser.ID == nil {
 			break
@@ -263,6 +286,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Workflow.Specification(childComplexity), true
+
+	case "Workflow.specificationPath":
+		if e.complexity.Workflow.SpecificationPath == nil {
+			break
+		}
+
+		return e.complexity.Workflow.SpecificationPath(childComplexity), true
 
 	}
 	return 0, false
@@ -332,20 +362,23 @@ var sources = []*ast.Source{
   id: String!
   name: String!
   specification: String!
+  specificationPath: String!
   creatorID: String!
 }
 `, BuiltIn: false},
 	{Name: "internal/graphql/schema/main.graphqls", Input: `scalar Upload
+scalar Void
 
 type Query {
   getSessionUser: SessionUser!
   getIntegration(id: String!): Integration!
+  getWorkflow(id: String!): Workflow!
 }
 
 type Mutation {
   # Integration
   createIntegration(specification: String!): Integration!
-  uploadIntegrationAvatar(id: String!, file: Upload!): Integration!
+  uploadIntegrationAvatar(id: String!, file: Upload!): Void
   patchIntegrationSpecification(id: String!, patch: String!): Integration!
 
   # Workflow
@@ -364,11 +397,12 @@ type SessionUser {
   id: String!
 }
 `, BuiltIn: false},
-	{Name: "internal/graphql/schema/workflow.graphqls", Input: `type Workflow {
+	{Name: "../gigamono/pkg/services/graphql/schema/workflow.graphqls", Input: `type Workflow {
   id: String!
   name: String!
-  isActive: String!
   specification: String!
+  specificationPath: String!
+  isActive: Boolean
   creatorID: String!
 }
 `, BuiltIn: false},
@@ -526,6 +560,21 @@ func (ec *executionContext) field_Query_getIntegration_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getWorkflow_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -669,6 +718,41 @@ func (ec *executionContext) _Integration_specification(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Integration_specificationPath(ctx context.Context, field graphql.CollectedField, obj *model.Integration) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Integration",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SpecificationPath, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Integration_creatorID(ctx context.Context, field graphql.CollectedField, obj *model.Integration) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -778,14 +862,11 @@ func (ec *executionContext) _Mutation_uploadIntegrationAvatar(ctx context.Contex
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Integration)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+	return ec.marshalOVoid2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_patchIntegrationSpecification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -986,6 +1067,48 @@ func (ec *executionContext) _Query_getIntegration(ctx context.Context, field gra
 	res := resTmp.(*model.Integration)
 	fc.Result = res
 	return ec.marshalNIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getWorkflow(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getWorkflow_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetWorkflow(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Workflow)
+	fc.Result = res
+	return ec.marshalNWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1199,41 +1322,6 @@ func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Workflow_isActive(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IsActive, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Workflow_specification(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1267,6 +1355,73 @@ func (ec *executionContext) _Workflow_specification(ctx context.Context, field g
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workflow_specificationPath(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workflow",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SpecificationPath, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Workflow_isActive(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Workflow",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsActive, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Workflow_creatorID(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
@@ -2425,6 +2580,11 @@ func (ec *executionContext) _Integration(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "specificationPath":
+			out.Values[i] = ec._Integration_specificationPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "creatorID":
 			out.Values[i] = ec._Integration_creatorID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2463,9 +2623,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "uploadIntegrationAvatar":
 			out.Values[i] = ec._Mutation_uploadIntegrationAvatar(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "patchIntegrationSpecification":
 			out.Values[i] = ec._Mutation_patchIntegrationSpecification(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -2527,6 +2684,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getIntegration(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getWorkflow":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getWorkflow(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2622,16 +2793,18 @@ func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "isActive":
-			out.Values[i] = ec._Workflow_isActive(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "specification":
 			out.Values[i] = ec._Workflow_specification(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "specificationPath":
+			out.Values[i] = ec._Workflow_specificationPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isActive":
+			out.Values[i] = ec._Workflow_isActive(ctx, field, obj)
 		case "creatorID":
 			out.Values[i] = ec._Workflow_creatorID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3251,6 +3424,21 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOVoid2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVoid2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
