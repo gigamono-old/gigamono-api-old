@@ -11,11 +11,11 @@ import (
 )
 
 type Integration struct {
-	ID                string `json:"id" `
-	Name              string `json:"name" `
-	Specification     string `json:"specification" `
-	SpecificationPath string `json:"specificationPath" `
-	CreatorID         string `json:"creatorID" `
+	ID                   string `json:"id" `
+	Name                 string `json:"name" `
+	Specification        string `json:"specification" `
+	SpecificationFileURL string `json:"specificationFileURL" `
+	CreatorID            string `json:"creatorID" `
 }
 type SessionUser struct {
 	ID string `json:"id" `
@@ -24,12 +24,12 @@ type User struct {
 	ID string `json:"id" `
 }
 type Workflow struct {
-	ID                string `json:"id" `
-	Name              string `json:"name" `
-	Specification     string `json:"specification" `
-	SpecificationPath string `json:"specificationPath" `
-	IsActive          *bool  `json:"isActive" `
-	CreatorID         string `json:"creatorID" `
+	ID                   string `json:"id" `
+	Name                 string `json:"name" `
+	Specification        string `json:"specification" `
+	SpecificationFileURL string `json:"specificationFileURL" `
+	IsActive             *bool  `json:"isActive" `
+	CreatorID            string `json:"creatorID" `
 }
 type Directive struct {
 	Name        string                      `json:"name" `

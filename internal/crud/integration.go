@@ -49,10 +49,10 @@ func CreateIntegration(ctx context.Context, app *inits.App, specification string
 	}
 
 	return &model.Integration{
-		ID:                integration.ID.String(),
-		Name:              integration.Name,
-		CreatorID:         integration.CreatorID.String(),
-		SpecificationPath: integration.SpecificationPath,
+		ID:                   integration.ID.String(),
+		Name:                 integration.Name,
+		CreatorID:            integration.CreatorID.String(),
+		SpecificationFileURL: integration.SpecificationFileURL,
 	}, nil
 }
 
@@ -93,7 +93,7 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 	}
 
 	// Read specification file.
-	specificationString, err := app.Filestore.Project.ReadFile(integration.SpecificationPath)
+	specificationString, err := app.Filestore.Project.ReadFile(integration.SpecificationFileURL)
 	if err != nil {
 		panic(errs.NewSystemError("", "reading integration spec", err))
 	}
@@ -118,7 +118,7 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 	}
 
 	// Overwrite spec file.
-	if _, err := app.Filestore.Project.WriteToFile(integration.SpecificationPath, []byte(specificationJSON)); err != nil {
+	if _, err := app.Filestore.Project.WriteToFile(integration.SpecificationFileURL, []byte(specificationJSON)); err != nil {
 		panic(errs.NewSystemError("", "writing integration spec to file", err))
 	}
 
@@ -147,9 +147,9 @@ func GetIntegration(_ context.Context, app *inits.App, integrationID string) (*m
 	}
 
 	return &model.Integration{
-		ID:                integration.ID.String(),
-		Name:              integration.Name,
-		CreatorID:         integration.CreatorID.String(),
-		SpecificationPath: integration.SpecificationPath,
+		ID:                   integration.ID.String(),
+		Name:                 integration.Name,
+		CreatorID:            integration.CreatorID.String(),
+		SpecificationFileURL: integration.SpecificationFileURL,
 	}, nil
 }

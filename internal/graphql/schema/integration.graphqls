@@ -2,6 +2,6 @@ type Integration {
   id: String!
   name: String!
   specification: String!
-  specificationPath: String!
+  specificationFileURL: String!
   creatorID: String!
 }
