@@ -10,7 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
 	"github.com/gigamono/gigamono/pkg/configs"
-	controller "github.com/gigamono/gigamono/pkg/database/controllers/resource"
+	"github.com/gigamono/gigamono/pkg/database/models/resource"
 	"github.com/gigamono/gigamono/pkg/errs"
 	"github.com/gigamono/gigamono/pkg/files"
 	"github.com/gigamono/gigamono/pkg/inits"
@@ -43,8 +43,8 @@ func CreateIntegration(ctx context.Context, app *inits.App, specification string
 	}
 
 	// Create the integration in db.
-	integration, err := controller.CreateIntegration(&app.DB, &userID, integrationConfig.Metadata.Name, filePath)
-	if err != nil {
+	integration := resource.Integration{Name: integrationConfig.Metadata.Name, CreatorID: &userID, SpecificationFileURL: filePath}
+	if err = integration.Create(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "creating integration", err))
 	}
 
@@ -87,8 +87,8 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 	fmt.Println("100")
 
 	// Get the integration from db.
-	integration, err := controller.GetIntegration(&app.DB, &integrationUUID)
-	if err != nil {
+	integration := resource.Integration{ID: integrationID}
+	if err = integration.GetByID(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "getting integration", err))
 	}
 
@@ -141,8 +141,8 @@ func GetIntegration(_ context.Context, app *inits.App, integrationID string) (*m
 	}
 
 	// Get the integration from db.
-	integration, err := controller.GetIntegration(&app.DB, &integrationUUID)
-	if err != nil {
+	integration := resource.Integration{ID: integrationID}
+	if err = integration.GetByID(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "getting integration", err))
 	}
 
