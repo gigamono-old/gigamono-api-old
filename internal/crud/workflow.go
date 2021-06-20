@@ -9,8 +9,8 @@ import (
 )
 
 // CreateWorkflow creates a new workflow in the database.
-func CreateWorkflow(ctx context.Context, app *inits.App, specification string) (*model.Workflow, error) {
-	workflow, err := crud.CreateWorkflow(ctx, app, specification)
+func CreateWorkflow(ctx context.Context, app *inits.App, specification string, automationID string) (*model.Workflow, error) {
+	workflow, err := crud.CreateWorkflow(ctx, app, specification, automationID)
 	if err != nil {
 		return nil, err
 	}
@@ -18,9 +18,9 @@ func CreateWorkflow(ctx context.Context, app *inits.App, specification string) (
 	return &model.Workflow{
 		ID:                   workflow.ID.String(),
 		Name:                 workflow.Name,
-		IsActive:             &workflow.IsActive,
-		CreatorID:            workflow.CreatorID.String(),
 		SpecificationFileURL: workflow.SpecificationFileURL,
+		CreatorID:            workflow.CreatorID.String(),
+		AutomationID:         workflow.AutomationID.String(),
 	}, nil
 }
 
@@ -34,8 +34,8 @@ func GetWorkflow(ctx context.Context, app *inits.App, workflowID string) (*model
 	return &model.Workflow{
 		ID:                   workflow.ID.String(),
 		Name:                 workflow.Name,
-		IsActive:             &workflow.IsActive,
-		CreatorID:            workflow.CreatorID.String(),
 		SpecificationFileURL: workflow.SpecificationFileURL,
+		CreatorID:            workflow.CreatorID.String(),
+		AutomationID:         workflow.AutomationID.String(),
 	}, nil
 }

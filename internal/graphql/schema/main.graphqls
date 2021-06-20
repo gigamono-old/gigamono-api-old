@@ -14,7 +14,7 @@ type Mutation {
   patchIntegrationSpecification(id: String!, patch: String!): Integration!
 
   # Workflow
-  createWorkflow(specification: String!): Workflow!
+  createWorkflow(specification: String!, automationID: String!): Workflow!
   patchWorkflowSpecification(id: String!, patch: String!): Workflow
 }
 

@@ -25,8 +25,8 @@ func (r *mutationResolver) PatchIntegrationSpecification(ctx context.Context, id
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) CreateWorkflow(ctx context.Context, specification string) (*model.Workflow, error) {
-	return crud.CreateWorkflow(ctx, r.App, specification)
+func (r *mutationResolver) CreateWorkflow(ctx context.Context, specification string, automationID string) (*model.Workflow, error) {
+	return crud.CreateWorkflow(ctx, r.App, specification, automationID)
 }
 
 func (r *mutationResolver) PatchWorkflowSpecification(ctx context.Context, id string, patch string) (*model.Workflow, error) {

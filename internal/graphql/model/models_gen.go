@@ -28,8 +28,8 @@ type Workflow struct {
 	Name                 string `json:"name" `
 	Specification        string `json:"specification" `
 	SpecificationFileURL string `json:"specificationFileURL" `
-	IsActive             *bool  `json:"isActive" `
 	CreatorID            string `json:"creatorID" `
+	AutomationID         string `json:"automationID" `
 }
 type Directive struct {
 	Name        string                      `json:"name" `
