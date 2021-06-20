@@ -26,6 +26,7 @@ func NewAPIServer(app inits.App) (APIServer, error) {
 	var authClient generated.AuthClient
 
 	// TODO: Sec: Insecure connection.
+	// TODO: Remove this. It is not needed anymore. user.CreateIfNotExist already addresses this issue.
 	client, err := grpc.GetInsecureClient("localhost", app.Config.Services.Auth.Ports.Private, app.Config)
 	if err != nil {
 		logs.FmtPrintln("initialising api server: unable to connect to Auth Service:", err)

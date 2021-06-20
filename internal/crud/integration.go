@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
 	"github.com/gigamono/gigamono/pkg/configs"
+	"github.com/gigamono/gigamono/pkg/database/models"
 	"github.com/gigamono/gigamono/pkg/database/models/resource"
 	"github.com/gigamono/gigamono/pkg/errs"
 	"github.com/gigamono/gigamono/pkg/files"
@@ -87,7 +88,7 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 	fmt.Println("100")
 
 	// Get the integration from db.
-	integration := resource.Integration{ID: integrationID}
+	integration := resource.Integration{Base: models.Base{ID: integrationUUID}}
 	if err = integration.GetByID(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "getting integration", err))
 	}
@@ -141,7 +142,7 @@ func GetIntegration(_ context.Context, app *inits.App, integrationID string) (*m
 	}
 
 	// Get the integration from db.
-	integration := resource.Integration{ID: integrationID}
+	integration := resource.Integration{Base: models.Base{ID: integrationUUID}}
 	if err = integration.GetByID(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "getting integration", err))
 	}
