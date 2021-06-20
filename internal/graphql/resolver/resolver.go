@@ -10,6 +10,6 @@ import (
 // Resolver holds dependencies like app.
 type Resolver struct {
 	*inits.App
-	AuthClient           proto.AuthClient
-	Validate              *validator.Validate
+	AuthClient proto.AuthClient
+	Validate   *validator.Validate
 }
