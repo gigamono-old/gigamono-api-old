@@ -1,0 +1,66 @@
+type Preferences {
+  id: String!
+  userID: String!
+  focusWorkspaceIndex: Int!
+  workspaces: [PrefsWorkspace]!
+}
+
+type PrefsWorkspace {
+  id: String!
+  focusSpaceIndex: Int!
+  spaces: [PrefsSpace]!
+  layout: PrefsLayout!
+}
+
+type PrefsSpace {
+  id: String!
+  focusDeckIndex: Int!
+  focusAppIndex: Int!
+  focusAutomationIndex: Int!
+  focusBaseIndex: Int!
+  decks: [PrefsDeck]!
+  automations: [PrefsAutomation]!
+  bases: [PrefsBase]!
+}
+
+type PrefsDeck {
+  id: String!
+  focusBoardIndex: Int!
+  decks: [PrefsDeck]!
+}
+
+type PrefsAutomation {
+  id: String!
+  focusWorkflowIndex: Int!
+  workflows: [PrefsWorkflow]!
+}
+
+type PrefsBase {
+  id: String!
+  focusTableIndex: Int!
+  tables: [PrefsTable]!
+}
+
+type PrefsBoard {
+  id: String!
+}
+
+type PrefsWorkflow {
+  id: String!
+}
+
+type PrefsTable {
+  id: String!
+}
+
+type PrefsLayout {
+  mainShortcuts: [Shortcut]!
+  quickShortcuts: [Shortcut]!
+  otherShortcuts: [Shortcut]!
+}
+
+type Shortcut {
+  iconName: String!
+  entityName: String!
+  route: String!
+}

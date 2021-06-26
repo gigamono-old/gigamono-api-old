@@ -37,6 +37,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	SessionUser() SessionUserResolver
 }
 
 type DirectiveRoot struct {
@@ -53,48 +54,121 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateIntegration             func(childComplexity int, specification string) int
-		CreateWorkflow                func(childComplexity int, specification string, automationID string) int
+		CreateIntegration             func(childComplexity int, integration model.IntegrationInput) int
 		PatchIntegrationSpecification func(childComplexity int, id string, patch string) int
-		PatchWorkflowSpecification    func(childComplexity int, id string, patch string) int
+		UpdateProfile                 func(childComplexity int, id string, profile model.ProfileInput) int
 		UploadIntegrationAvatar       func(childComplexity int, id string, file graphql.Upload) int
+		UploadProfileAvatar           func(childComplexity int, id string, file graphql.Upload) int
+	}
+
+	Preferences struct {
+		FocusWorkspaceIndex func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		UserID              func(childComplexity int) int
+		Workspaces          func(childComplexity int) int
+	}
+
+	PrefsAutomation struct {
+		FocusWorkflowIndex func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		Workflows          func(childComplexity int) int
+	}
+
+	PrefsBase struct {
+		FocusTableIndex func(childComplexity int) int
+		ID              func(childComplexity int) int
+		Tables          func(childComplexity int) int
+	}
+
+	PrefsBoard struct {
+		ID func(childComplexity int) int
+	}
+
+	PrefsDeck struct {
+		Decks           func(childComplexity int) int
+		FocusBoardIndex func(childComplexity int) int
+		ID              func(childComplexity int) int
+	}
+
+	PrefsLayout struct {
+		MainShortcuts  func(childComplexity int) int
+		OtherShortcuts func(childComplexity int) int
+		QuickShortcuts func(childComplexity int) int
+	}
+
+	PrefsSpace struct {
+		Automations          func(childComplexity int) int
+		Bases                func(childComplexity int) int
+		Decks                func(childComplexity int) int
+		FocusAppIndex        func(childComplexity int) int
+		FocusAutomationIndex func(childComplexity int) int
+		FocusBaseIndex       func(childComplexity int) int
+		FocusDeckIndex       func(childComplexity int) int
+		ID                   func(childComplexity int) int
+	}
+
+	PrefsTable struct {
+		ID func(childComplexity int) int
+	}
+
+	PrefsWorkflow struct {
+		ID func(childComplexity int) int
+	}
+
+	PrefsWorkspace struct {
+		FocusSpaceIndex func(childComplexity int) int
+		ID              func(childComplexity int) int
+		Layout          func(childComplexity int) int
+		Spaces          func(childComplexity int) int
+	}
+
+	Profile struct {
+		AvatarURL func(childComplexity int) int
+		Email     func(childComplexity int) int
+		FirstName func(childComplexity int) int
+		ID        func(childComplexity int) int
+		LastName  func(childComplexity int) int
+		UserID    func(childComplexity int) int
+		Username  func(childComplexity int) int
 	}
 
 	Query struct {
-		GetIntegration func(childComplexity int, id string) int
-		GetSessionUser func(childComplexity int) int
-		GetWorkflow    func(childComplexity int, id string) int
+		Integration func(childComplexity int, id string) int
+		Preferences func(childComplexity int, id string) int
+		SessionUser func(childComplexity int) int
 	}
 
 	SessionUser struct {
-		ID func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Preferences func(childComplexity int) int
+		Profile     func(childComplexity int) int
+	}
+
+	Shortcut struct {
+		EntityName func(childComplexity int) int
+		IconName   func(childComplexity int) int
+		Route      func(childComplexity int) int
 	}
 
 	User struct {
 		ID func(childComplexity int) int
 	}
-
-	Workflow struct {
-		AutomationID         func(childComplexity int) int
-		CreatorID            func(childComplexity int) int
-		ID                   func(childComplexity int) int
-		Name                 func(childComplexity int) int
-		Specification        func(childComplexity int) int
-		SpecificationFileURL func(childComplexity int) int
-	}
 }
 
 type MutationResolver interface {
-	CreateIntegration(ctx context.Context, specification string) (*model.Integration, error)
+	UpdateProfile(ctx context.Context, id string, profile model.ProfileInput) (*model.Profile, error)
+	UploadProfileAvatar(ctx context.Context, id string, file graphql.Upload) (*string, error)
+	CreateIntegration(ctx context.Context, integration model.IntegrationInput) (*model.Integration, error)
 	UploadIntegrationAvatar(ctx context.Context, id string, file graphql.Upload) (*string, error)
 	PatchIntegrationSpecification(ctx context.Context, id string, patch string) (*model.Integration, error)
-	CreateWorkflow(ctx context.Context, specification string, automationID string) (*model.Workflow, error)
-	PatchWorkflowSpecification(ctx context.Context, id string, patch string) (*model.Workflow, error)
 }
 type QueryResolver interface {
-	GetSessionUser(ctx context.Context) (*model.SessionUser, error)
-	GetIntegration(ctx context.Context, id string) (*model.Integration, error)
-	GetWorkflow(ctx context.Context, id string) (*model.Workflow, error)
+	SessionUser(ctx context.Context) (*model.SessionUser, error)
+	Integration(ctx context.Context, id string) (*model.Integration, error)
+	Preferences(ctx context.Context, id string) (*model.Preferences, error)
+}
+type SessionUserResolver interface {
+	Preferences(ctx context.Context, obj *model.SessionUser) (*model.Preferences, error)
 }
 
 type executableSchema struct {
@@ -157,19 +231,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateIntegration(childComplexity, args["specification"].(string)), true
-
-	case "Mutation.createWorkflow":
-		if e.complexity.Mutation.CreateWorkflow == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createWorkflow_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateWorkflow(childComplexity, args["specification"].(string), args["automationID"].(string)), true
+		return e.complexity.Mutation.CreateIntegration(childComplexity, args["integration"].(model.IntegrationInput)), true
 
 	case "Mutation.patchIntegrationSpecification":
 		if e.complexity.Mutation.PatchIntegrationSpecification == nil {
@@ -183,17 +245,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.PatchIntegrationSpecification(childComplexity, args["id"].(string), args["patch"].(string)), true
 
-	case "Mutation.patchWorkflowSpecification":
-		if e.complexity.Mutation.PatchWorkflowSpecification == nil {
+	case "Mutation.updateProfile":
+		if e.complexity.Mutation.UpdateProfile == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_patchWorkflowSpecification_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateProfile_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PatchWorkflowSpecification(childComplexity, args["id"].(string), args["patch"].(string)), true
+		return e.complexity.Mutation.UpdateProfile(childComplexity, args["id"].(string), args["profile"].(model.ProfileInput)), true
 
 	case "Mutation.uploadIntegrationAvatar":
 		if e.complexity.Mutation.UploadIntegrationAvatar == nil {
@@ -207,36 +269,314 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UploadIntegrationAvatar(childComplexity, args["id"].(string), args["file"].(graphql.Upload)), true
 
-	case "Query.getIntegration":
-		if e.complexity.Query.GetIntegration == nil {
+	case "Mutation.uploadProfileAvatar":
+		if e.complexity.Mutation.UploadProfileAvatar == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getIntegration_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_uploadProfileAvatar_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetIntegration(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.UploadProfileAvatar(childComplexity, args["id"].(string), args["file"].(graphql.Upload)), true
 
-	case "Query.getSessionUser":
-		if e.complexity.Query.GetSessionUser == nil {
+	case "Preferences.focusWorkspaceIndex":
+		if e.complexity.Preferences.FocusWorkspaceIndex == nil {
 			break
 		}
 
-		return e.complexity.Query.GetSessionUser(childComplexity), true
+		return e.complexity.Preferences.FocusWorkspaceIndex(childComplexity), true
 
-	case "Query.getWorkflow":
-		if e.complexity.Query.GetWorkflow == nil {
+	case "Preferences.id":
+		if e.complexity.Preferences.ID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getWorkflow_args(context.TODO(), rawArgs)
+		return e.complexity.Preferences.ID(childComplexity), true
+
+	case "Preferences.userID":
+		if e.complexity.Preferences.UserID == nil {
+			break
+		}
+
+		return e.complexity.Preferences.UserID(childComplexity), true
+
+	case "Preferences.workspaces":
+		if e.complexity.Preferences.Workspaces == nil {
+			break
+		}
+
+		return e.complexity.Preferences.Workspaces(childComplexity), true
+
+	case "PrefsAutomation.focusWorkflowIndex":
+		if e.complexity.PrefsAutomation.FocusWorkflowIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsAutomation.FocusWorkflowIndex(childComplexity), true
+
+	case "PrefsAutomation.id":
+		if e.complexity.PrefsAutomation.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsAutomation.ID(childComplexity), true
+
+	case "PrefsAutomation.workflows":
+		if e.complexity.PrefsAutomation.Workflows == nil {
+			break
+		}
+
+		return e.complexity.PrefsAutomation.Workflows(childComplexity), true
+
+	case "PrefsBase.focusTableIndex":
+		if e.complexity.PrefsBase.FocusTableIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsBase.FocusTableIndex(childComplexity), true
+
+	case "PrefsBase.id":
+		if e.complexity.PrefsBase.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsBase.ID(childComplexity), true
+
+	case "PrefsBase.tables":
+		if e.complexity.PrefsBase.Tables == nil {
+			break
+		}
+
+		return e.complexity.PrefsBase.Tables(childComplexity), true
+
+	case "PrefsBoard.id":
+		if e.complexity.PrefsBoard.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsBoard.ID(childComplexity), true
+
+	case "PrefsDeck.decks":
+		if e.complexity.PrefsDeck.Decks == nil {
+			break
+		}
+
+		return e.complexity.PrefsDeck.Decks(childComplexity), true
+
+	case "PrefsDeck.focusBoardIndex":
+		if e.complexity.PrefsDeck.FocusBoardIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsDeck.FocusBoardIndex(childComplexity), true
+
+	case "PrefsDeck.id":
+		if e.complexity.PrefsDeck.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsDeck.ID(childComplexity), true
+
+	case "PrefsLayout.mainShortcuts":
+		if e.complexity.PrefsLayout.MainShortcuts == nil {
+			break
+		}
+
+		return e.complexity.PrefsLayout.MainShortcuts(childComplexity), true
+
+	case "PrefsLayout.otherShortcuts":
+		if e.complexity.PrefsLayout.OtherShortcuts == nil {
+			break
+		}
+
+		return e.complexity.PrefsLayout.OtherShortcuts(childComplexity), true
+
+	case "PrefsLayout.quickShortcuts":
+		if e.complexity.PrefsLayout.QuickShortcuts == nil {
+			break
+		}
+
+		return e.complexity.PrefsLayout.QuickShortcuts(childComplexity), true
+
+	case "PrefsSpace.automations":
+		if e.complexity.PrefsSpace.Automations == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.Automations(childComplexity), true
+
+	case "PrefsSpace.bases":
+		if e.complexity.PrefsSpace.Bases == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.Bases(childComplexity), true
+
+	case "PrefsSpace.decks":
+		if e.complexity.PrefsSpace.Decks == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.Decks(childComplexity), true
+
+	case "PrefsSpace.focusAppIndex":
+		if e.complexity.PrefsSpace.FocusAppIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.FocusAppIndex(childComplexity), true
+
+	case "PrefsSpace.focusAutomationIndex":
+		if e.complexity.PrefsSpace.FocusAutomationIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.FocusAutomationIndex(childComplexity), true
+
+	case "PrefsSpace.focusBaseIndex":
+		if e.complexity.PrefsSpace.FocusBaseIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.FocusBaseIndex(childComplexity), true
+
+	case "PrefsSpace.focusDeckIndex":
+		if e.complexity.PrefsSpace.FocusDeckIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.FocusDeckIndex(childComplexity), true
+
+	case "PrefsSpace.id":
+		if e.complexity.PrefsSpace.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsSpace.ID(childComplexity), true
+
+	case "PrefsTable.id":
+		if e.complexity.PrefsTable.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsTable.ID(childComplexity), true
+
+	case "PrefsWorkflow.id":
+		if e.complexity.PrefsWorkflow.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsWorkflow.ID(childComplexity), true
+
+	case "PrefsWorkspace.focusSpaceIndex":
+		if e.complexity.PrefsWorkspace.FocusSpaceIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsWorkspace.FocusSpaceIndex(childComplexity), true
+
+	case "PrefsWorkspace.id":
+		if e.complexity.PrefsWorkspace.ID == nil {
+			break
+		}
+
+		return e.complexity.PrefsWorkspace.ID(childComplexity), true
+
+	case "PrefsWorkspace.layout":
+		if e.complexity.PrefsWorkspace.Layout == nil {
+			break
+		}
+
+		return e.complexity.PrefsWorkspace.Layout(childComplexity), true
+
+	case "PrefsWorkspace.spaces":
+		if e.complexity.PrefsWorkspace.Spaces == nil {
+			break
+		}
+
+		return e.complexity.PrefsWorkspace.Spaces(childComplexity), true
+
+	case "Profile.avatarURL":
+		if e.complexity.Profile.AvatarURL == nil {
+			break
+		}
+
+		return e.complexity.Profile.AvatarURL(childComplexity), true
+
+	case "Profile.email":
+		if e.complexity.Profile.Email == nil {
+			break
+		}
+
+		return e.complexity.Profile.Email(childComplexity), true
+
+	case "Profile.firstName":
+		if e.complexity.Profile.FirstName == nil {
+			break
+		}
+
+		return e.complexity.Profile.FirstName(childComplexity), true
+
+	case "Profile.id":
+		if e.complexity.Profile.ID == nil {
+			break
+		}
+
+		return e.complexity.Profile.ID(childComplexity), true
+
+	case "Profile.lastName":
+		if e.complexity.Profile.LastName == nil {
+			break
+		}
+
+		return e.complexity.Profile.LastName(childComplexity), true
+
+	case "Profile.userID":
+		if e.complexity.Profile.UserID == nil {
+			break
+		}
+
+		return e.complexity.Profile.UserID(childComplexity), true
+
+	case "Profile.username":
+		if e.complexity.Profile.Username == nil {
+			break
+		}
+
+		return e.complexity.Profile.Username(childComplexity), true
+
+	case "Query.integration":
+		if e.complexity.Query.Integration == nil {
+			break
+		}
+
+		args, err := ec.field_Query_integration_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetWorkflow(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Integration(childComplexity, args["id"].(string)), true
+
+	case "Query.preferences":
+		if e.complexity.Query.Preferences == nil {
+			break
+		}
+
+		args, err := ec.field_Query_preferences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Preferences(childComplexity, args["id"].(string)), true
+
+	case "Query.sessionUser":
+		if e.complexity.Query.SessionUser == nil {
+			break
+		}
+
+		return e.complexity.Query.SessionUser(childComplexity), true
 
 	case "SessionUser.id":
 		if e.complexity.SessionUser.ID == nil {
@@ -245,54 +585,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SessionUser.ID(childComplexity), true
 
+	case "SessionUser.preferences":
+		if e.complexity.SessionUser.Preferences == nil {
+			break
+		}
+
+		return e.complexity.SessionUser.Preferences(childComplexity), true
+
+	case "SessionUser.profile":
+		if e.complexity.SessionUser.Profile == nil {
+			break
+		}
+
+		return e.complexity.SessionUser.Profile(childComplexity), true
+
+	case "Shortcut.entityName":
+		if e.complexity.Shortcut.EntityName == nil {
+			break
+		}
+
+		return e.complexity.Shortcut.EntityName(childComplexity), true
+
+	case "Shortcut.iconName":
+		if e.complexity.Shortcut.IconName == nil {
+			break
+		}
+
+		return e.complexity.Shortcut.IconName(childComplexity), true
+
+	case "Shortcut.route":
+		if e.complexity.Shortcut.Route == nil {
+			break
+		}
+
+		return e.complexity.Shortcut.Route(childComplexity), true
+
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
 		}
 
 		return e.complexity.User.ID(childComplexity), true
-
-	case "Workflow.automationID":
-		if e.complexity.Workflow.AutomationID == nil {
-			break
-		}
-
-		return e.complexity.Workflow.AutomationID(childComplexity), true
-
-	case "Workflow.creatorID":
-		if e.complexity.Workflow.CreatorID == nil {
-			break
-		}
-
-		return e.complexity.Workflow.CreatorID(childComplexity), true
-
-	case "Workflow.id":
-		if e.complexity.Workflow.ID == nil {
-			break
-		}
-
-		return e.complexity.Workflow.ID(childComplexity), true
-
-	case "Workflow.name":
-		if e.complexity.Workflow.Name == nil {
-			break
-		}
-
-		return e.complexity.Workflow.Name(childComplexity), true
-
-	case "Workflow.specification":
-		if e.complexity.Workflow.Specification == nil {
-			break
-		}
-
-		return e.complexity.Workflow.Specification(childComplexity), true
-
-	case "Workflow.specificationFileURL":
-		if e.complexity.Workflow.SpecificationFileURL == nil {
-			break
-		}
-
-		return e.complexity.Workflow.SpecificationFileURL(childComplexity), true
 
 	}
 	return 0, false
@@ -365,27 +698,122 @@ var sources = []*ast.Source{
   specificationFileURL: String!
   creatorID: String!
 }
+
+
+input IntegrationInput {
+  specification: String!
+}
 `, BuiltIn: false},
 	{Name: "internal/graphql/schema/main.graphqls", Input: `scalar Upload
 scalar Void
 
 type Query {
-  getSessionUser: SessionUser!
-  getIntegration(id: String!): Integration!
-  getWorkflow(id: String!): Workflow!
+  # User
+  sessionUser: SessionUser!
+
+  # Integration
+  integration(id: String!): Integration!
+
+  # Preferences
+  preferences(id: String!): Preferences!
 }
 
 type Mutation {
+  # Profile
+  updateProfile(id: String!, profile: ProfileInput!): Profile!
+  uploadProfileAvatar(id: String!, file: Upload!): Void
+
   # Integration
-  createIntegration(specification: String!): Integration!
+  createIntegration(integration: IntegrationInput!): Integration!
   uploadIntegrationAvatar(id: String!, file: Upload!): Void
   patchIntegrationSpecification(id: String!, patch: String!): Integration!
-
-  # Workflow
-  createWorkflow(specification: String!, automationID: String!): Workflow!
-  patchWorkflowSpecification(id: String!, patch: String!): Workflow
 }
 
+`, BuiltIn: false},
+	{Name: "internal/graphql/schema/preferences.graphqls", Input: `type Preferences {
+  id: String!
+  userID: String!
+  focusWorkspaceIndex: Int!
+  workspaces: [PrefsWorkspace]!
+}
+
+type PrefsWorkspace {
+  id: String!
+  focusSpaceIndex: Int!
+  spaces: [PrefsSpace]!
+  layout: PrefsLayout!
+}
+
+type PrefsSpace {
+  id: String!
+  focusDeckIndex: Int!
+  focusAppIndex: Int!
+  focusAutomationIndex: Int!
+  focusBaseIndex: Int!
+  decks: [PrefsDeck]!
+  automations: [PrefsAutomation]!
+  bases: [PrefsBase]!
+}
+
+type PrefsDeck {
+  id: String!
+  focusBoardIndex: Int!
+  decks: [PrefsDeck]!
+}
+
+type PrefsAutomation {
+  id: String!
+  focusWorkflowIndex: Int!
+  workflows: [PrefsWorkflow]!
+}
+
+type PrefsBase {
+  id: String!
+  focusTableIndex: Int!
+  tables: [PrefsTable]!
+}
+
+type PrefsBoard {
+  id: String!
+}
+
+type PrefsWorkflow {
+  id: String!
+}
+
+type PrefsTable {
+  id: String!
+}
+
+type PrefsLayout {
+  mainShortcuts: [Shortcut]!
+  quickShortcuts: [Shortcut]!
+  otherShortcuts: [Shortcut]!
+}
+
+type Shortcut {
+  iconName: String!
+  entityName: String!
+  route: String!
+}
+`, BuiltIn: false},
+	{Name: "internal/graphql/schema/profile.graphqls", Input: `type Profile {
+  id: String!
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  avatarURL: String
+  userID: String!
+}
+
+input ProfileInput {
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  avatarURL: String
+}
 `, BuiltIn: false},
 	{Name: "internal/graphql/schema/user.graphqls", Input: `directive @tag(validate: String) on INPUT_FIELD_DEFINITION
 
@@ -395,15 +823,8 @@ type User {
 
 type SessionUser {
   id: String!
-}
-`, BuiltIn: false},
-	{Name: "../gigamono/pkg/services/graphql/schema/workflow.graphqls", Input: `type Workflow {
-  id: String!
-  name: String!
-  specification: String!
-  specificationFileURL: String!
-  creatorID: String!
-  automationID: String!
+  profile: Profile!
+  preferences: Preferences!
 }
 `, BuiltIn: false},
 }
@@ -431,39 +852,15 @@ func (ec *executionContext) dir_tag_args(ctx context.Context, rawArgs map[string
 func (ec *executionContext) field_Mutation_createIntegration_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["specification"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("specification"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.IntegrationInput
+	if tmp, ok := rawArgs["integration"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("integration"))
+		arg0, err = ec.unmarshalNIntegrationInput2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegrationInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["specification"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_createWorkflow_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["specification"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("specification"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["specification"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["automationID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("automationID"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["automationID"] = arg1
+	args["integration"] = arg0
 	return args, nil
 }
 
@@ -491,7 +888,7 @@ func (ec *executionContext) field_Mutation_patchIntegrationSpecification_args(ct
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_patchWorkflowSpecification_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -503,19 +900,43 @@ func (ec *executionContext) field_Mutation_patchWorkflowSpecification_args(ctx c
 		}
 	}
 	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["patch"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("patch"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg1 model.ProfileInput
+	if tmp, ok := rawArgs["profile"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profile"))
+		arg1, err = ec.unmarshalNProfileInput2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfileInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["patch"] = arg1
+	args["profile"] = arg1
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_uploadIntegrationAvatar_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		arg1, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["file"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_uploadProfileAvatar_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -554,7 +975,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getIntegration_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_integration_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -569,7 +990,7 @@ func (ec *executionContext) field_Query_getIntegration_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getWorkflow_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_preferences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -797,6 +1218,87 @@ func (ec *executionContext) _Integration_creatorID(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProfile_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProfile(rctx, args["id"].(string), args["profile"].(model.ProfileInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_uploadProfileAvatar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_uploadProfileAvatar_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UploadProfileAvatar(rctx, args["id"].(string), args["file"].(graphql.Upload))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOVoid2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createIntegration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -822,7 +1324,7 @@ func (ec *executionContext) _Mutation_createIntegration(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateIntegration(rctx, args["specification"].(string))
+		return ec.resolvers.Mutation().CreateIntegration(rctx, args["integration"].(model.IntegrationInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -920,7 +1422,7 @@ func (ec *executionContext) _Mutation_patchIntegrationSpecification(ctx context.
 	return ec.marshalNIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createWorkflow(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Preferences_id(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -928,24 +1430,17 @@ func (ec *executionContext) _Mutation_createWorkflow(ctx context.Context, field 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Mutation",
+		Object:     "Preferences",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createWorkflow_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateWorkflow(rctx, args["specification"].(string), args["automationID"].(string))
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -957,12 +1452,12 @@ func (ec *executionContext) _Mutation_createWorkflow(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Workflow)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_patchWorkflowSpecification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Preferences_userID(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -970,24 +1465,1102 @@ func (ec *executionContext) _Mutation_patchWorkflowSpecification(ctx context.Con
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Mutation",
+		Object:     "Preferences",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_patchWorkflowSpecification_args(ctx, rawArgs)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	fc.Args = args
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Preferences_focusWorkspaceIndex(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Preferences",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().PatchWorkflowSpecification(rctx, args["id"].(string), args["patch"].(string))
+		return obj.FocusWorkspaceIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Preferences_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Preferences",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workspaces, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsWorkspace)
+	fc.Result = res
+	return ec.marshalNPrefsWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsAutomation_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsAutomation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsAutomation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsAutomation_focusWorkflowIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsAutomation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsAutomation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusWorkflowIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsAutomation_workflows(ctx context.Context, field graphql.CollectedField, obj *model.PrefsAutomation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsAutomation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workflows, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsWorkflow)
+	fc.Result = res
+	return ec.marshalNPrefsWorkflow2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkflow(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsBase_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsBase) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsBase",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsBase_focusTableIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsBase) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsBase",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusTableIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsBase_tables(ctx context.Context, field graphql.CollectedField, obj *model.PrefsBase) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsBase",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tables, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsTable)
+	fc.Result = res
+	return ec.marshalNPrefsTable2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsTable(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsBoard_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsBoard) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsBoard",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsDeck_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDeck) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsDeck",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsDeck_focusBoardIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDeck) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsDeck",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusBoardIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsDeck_decks(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDeck) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsDeck",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Decks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsDeck)
+	fc.Result = res
+	return ec.marshalNPrefsDeck2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsLayout_mainShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.PrefsLayout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsLayout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MainShortcuts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Shortcut)
+	fc.Result = res
+	return ec.marshalNShortcut2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsLayout_quickShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.PrefsLayout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsLayout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.QuickShortcuts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Shortcut)
+	fc.Result = res
+	return ec.marshalNShortcut2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsLayout_otherShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.PrefsLayout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsLayout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OtherShortcuts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Shortcut)
+	fc.Result = res
+	return ec.marshalNShortcut2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_focusDeckIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusDeckIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_focusAppIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusAppIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_focusAutomationIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusAutomationIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_focusBaseIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusBaseIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_decks(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Decks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsDeck)
+	fc.Result = res
+	return ec.marshalNPrefsDeck2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_automations(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Automations, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsAutomation)
+	fc.Result = res
+	return ec.marshalNPrefsAutomation2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsAutomation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsSpace_bases(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsSpace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bases, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsBase)
+	fc.Result = res
+	return ec.marshalNPrefsBase2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsBase(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsTable_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsTable) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsTable",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsWorkflow_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkflow) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsWorkflow",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsWorkspace_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsWorkspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsWorkspace_focusSpaceIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsWorkspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusSpaceIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsWorkspace_spaces(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsWorkspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spaces, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsSpace)
+	fc.Result = res
+	return ec.marshalNPrefsSpace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsSpace(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsWorkspace_layout(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkspace) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsWorkspace",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Layout, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PrefsLayout)
+	fc.Result = res
+	return ec.marshalNPrefsLayout2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsLayout(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_id(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_username(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Username, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -996,12 +2569,175 @@ func (ec *executionContext) _Mutation_patchWorkflowSpecification(ctx context.Con
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Workflow)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Profile_firstName(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_lastName(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_email(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_avatarURL(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AvatarURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_userID(ctx context.Context, field graphql.CollectedField, obj *model.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_sessionUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1019,7 +2755,7 @@ func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field gra
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSessionUser(rctx)
+		return ec.resolvers.Query().SessionUser(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1036,7 +2772,7 @@ func (ec *executionContext) _Query_getSessionUser(ctx context.Context, field gra
 	return ec.marshalNSessionUser2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐSessionUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getIntegration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_integration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1053,7 +2789,7 @@ func (ec *executionContext) _Query_getIntegration(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getIntegration_args(ctx, rawArgs)
+	args, err := ec.field_Query_integration_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1061,7 +2797,7 @@ func (ec *executionContext) _Query_getIntegration(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetIntegration(rctx, args["id"].(string))
+		return ec.resolvers.Query().Integration(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1078,7 +2814,7 @@ func (ec *executionContext) _Query_getIntegration(ctx context.Context, field gra
 	return ec.marshalNIntegration2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getWorkflow(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_preferences(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1095,7 +2831,7 @@ func (ec *executionContext) _Query_getWorkflow(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getWorkflow_args(ctx, rawArgs)
+	args, err := ec.field_Query_preferences_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1103,7 +2839,7 @@ func (ec *executionContext) _Query_getWorkflow(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetWorkflow(rctx, args["id"].(string))
+		return ec.resolvers.Query().Preferences(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1115,9 +2851,9 @@ func (ec *executionContext) _Query_getWorkflow(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Workflow)
+	res := resTmp.(*model.Preferences)
 	fc.Result = res
-	return ec.marshalNWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx, field.Selections, res)
+	return ec.marshalNPreferences2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPreferences(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1226,6 +2962,181 @@ func (ec *executionContext) _SessionUser_id(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _SessionUser_profile(ctx context.Context, field graphql.CollectedField, obj *model.SessionUser) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SessionUser",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Profile, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SessionUser_preferences(ctx context.Context, field graphql.CollectedField, obj *model.SessionUser) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SessionUser",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SessionUser().Preferences(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Preferences)
+	fc.Result = res
+	return ec.marshalNPreferences2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPreferences(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Shortcut_iconName(ctx context.Context, field graphql.CollectedField, obj *model.Shortcut) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Shortcut",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IconName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Shortcut_entityName(ctx context.Context, field graphql.CollectedField, obj *model.Shortcut) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Shortcut",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EntityName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Shortcut_route(ctx context.Context, field graphql.CollectedField, obj *model.Shortcut) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Shortcut",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Route, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1245,216 +3156,6 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_id(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_name(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_specification(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Specification, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_specificationFileURL(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SpecificationFileURL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_creatorID(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatorID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Workflow_automationID(ctx context.Context, field graphql.CollectedField, obj *model.Workflow) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Workflow",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AutomationID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2558,6 +4259,78 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputIntegrationInput(ctx context.Context, obj interface{}) (model.IntegrationInput, error) {
+	var it model.IntegrationInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "specification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("specification"))
+			it.Specification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputProfileInput(ctx context.Context, obj interface{}) (model.ProfileInput, error) {
+	var it model.ProfileInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "username":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+			it.Username, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "avatarURL":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatarURL"))
+			it.AvatarURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2628,6 +4401,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "updateProfile":
+			out.Values[i] = ec._Mutation_updateProfile(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "uploadProfileAvatar":
+			out.Values[i] = ec._Mutation_uploadProfileAvatar(ctx, field)
 		case "createIntegration":
 			out.Values[i] = ec._Mutation_createIntegration(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -2640,13 +4420,423 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "createWorkflow":
-			out.Values[i] = ec._Mutation_createWorkflow(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var preferencesImplementors = []string{"Preferences"}
+
+func (ec *executionContext) _Preferences(ctx context.Context, sel ast.SelectionSet, obj *model.Preferences) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, preferencesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Preferences")
+		case "id":
+			out.Values[i] = ec._Preferences_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "patchWorkflowSpecification":
-			out.Values[i] = ec._Mutation_patchWorkflowSpecification(ctx, field)
+		case "userID":
+			out.Values[i] = ec._Preferences_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusWorkspaceIndex":
+			out.Values[i] = ec._Preferences_focusWorkspaceIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "workspaces":
+			out.Values[i] = ec._Preferences_workspaces(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsAutomationImplementors = []string{"PrefsAutomation"}
+
+func (ec *executionContext) _PrefsAutomation(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsAutomation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsAutomationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsAutomation")
+		case "id":
+			out.Values[i] = ec._PrefsAutomation_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusWorkflowIndex":
+			out.Values[i] = ec._PrefsAutomation_focusWorkflowIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "workflows":
+			out.Values[i] = ec._PrefsAutomation_workflows(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsBaseImplementors = []string{"PrefsBase"}
+
+func (ec *executionContext) _PrefsBase(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsBase) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsBaseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsBase")
+		case "id":
+			out.Values[i] = ec._PrefsBase_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusTableIndex":
+			out.Values[i] = ec._PrefsBase_focusTableIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "tables":
+			out.Values[i] = ec._PrefsBase_tables(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsBoardImplementors = []string{"PrefsBoard"}
+
+func (ec *executionContext) _PrefsBoard(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsBoard) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsBoardImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsBoard")
+		case "id":
+			out.Values[i] = ec._PrefsBoard_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsDeckImplementors = []string{"PrefsDeck"}
+
+func (ec *executionContext) _PrefsDeck(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsDeck) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsDeckImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsDeck")
+		case "id":
+			out.Values[i] = ec._PrefsDeck_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusBoardIndex":
+			out.Values[i] = ec._PrefsDeck_focusBoardIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "decks":
+			out.Values[i] = ec._PrefsDeck_decks(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsLayoutImplementors = []string{"PrefsLayout"}
+
+func (ec *executionContext) _PrefsLayout(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsLayout) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsLayoutImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsLayout")
+		case "mainShortcuts":
+			out.Values[i] = ec._PrefsLayout_mainShortcuts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "quickShortcuts":
+			out.Values[i] = ec._PrefsLayout_quickShortcuts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "otherShortcuts":
+			out.Values[i] = ec._PrefsLayout_otherShortcuts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsSpaceImplementors = []string{"PrefsSpace"}
+
+func (ec *executionContext) _PrefsSpace(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsSpace) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsSpaceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsSpace")
+		case "id":
+			out.Values[i] = ec._PrefsSpace_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusDeckIndex":
+			out.Values[i] = ec._PrefsSpace_focusDeckIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusAppIndex":
+			out.Values[i] = ec._PrefsSpace_focusAppIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusAutomationIndex":
+			out.Values[i] = ec._PrefsSpace_focusAutomationIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusBaseIndex":
+			out.Values[i] = ec._PrefsSpace_focusBaseIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "decks":
+			out.Values[i] = ec._PrefsSpace_decks(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "automations":
+			out.Values[i] = ec._PrefsSpace_automations(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bases":
+			out.Values[i] = ec._PrefsSpace_bases(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsTableImplementors = []string{"PrefsTable"}
+
+func (ec *executionContext) _PrefsTable(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsTable) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsTableImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsTable")
+		case "id":
+			out.Values[i] = ec._PrefsTable_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsWorkflowImplementors = []string{"PrefsWorkflow"}
+
+func (ec *executionContext) _PrefsWorkflow(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsWorkflow) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsWorkflowImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsWorkflow")
+		case "id":
+			out.Values[i] = ec._PrefsWorkflow_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsWorkspaceImplementors = []string{"PrefsWorkspace"}
+
+func (ec *executionContext) _PrefsWorkspace(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsWorkspace) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsWorkspaceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsWorkspace")
+		case "id":
+			out.Values[i] = ec._PrefsWorkspace_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "focusSpaceIndex":
+			out.Values[i] = ec._PrefsWorkspace_focusSpaceIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "spaces":
+			out.Values[i] = ec._PrefsWorkspace_spaces(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "layout":
+			out.Values[i] = ec._PrefsWorkspace_layout(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var profileImplementors = []string{"Profile"}
+
+func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, obj *model.Profile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, profileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Profile")
+		case "id":
+			out.Values[i] = ec._Profile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "username":
+			out.Values[i] = ec._Profile_username(ctx, field, obj)
+		case "firstName":
+			out.Values[i] = ec._Profile_firstName(ctx, field, obj)
+		case "lastName":
+			out.Values[i] = ec._Profile_lastName(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._Profile_email(ctx, field, obj)
+		case "avatarURL":
+			out.Values[i] = ec._Profile_avatarURL(ctx, field, obj)
+		case "userID":
+			out.Values[i] = ec._Profile_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2673,7 +4863,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getSessionUser":
+		case "sessionUser":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2681,13 +4871,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getSessionUser(ctx, field)
+				res = ec._Query_sessionUser(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "getIntegration":
+		case "integration":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2695,13 +4885,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getIntegration(ctx, field)
+				res = ec._Query_integration(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "getWorkflow":
+		case "preferences":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2709,7 +4899,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getWorkflow(ctx, field)
+				res = ec._Query_preferences(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2744,6 +4934,62 @@ func (ec *executionContext) _SessionUser(ctx context.Context, sel ast.SelectionS
 		case "id":
 			out.Values[i] = ec._SessionUser_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "profile":
+			out.Values[i] = ec._SessionUser_profile(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "preferences":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SessionUser_preferences(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var shortcutImplementors = []string{"Shortcut"}
+
+func (ec *executionContext) _Shortcut(ctx context.Context, sel ast.SelectionSet, obj *model.Shortcut) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shortcutImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Shortcut")
+		case "iconName":
+			out.Values[i] = ec._Shortcut_iconName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "entityName":
+			out.Values[i] = ec._Shortcut_entityName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "route":
+			out.Values[i] = ec._Shortcut_route(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		default:
@@ -2770,58 +5016,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = graphql.MarshalString("User")
 		case "id":
 			out.Values[i] = ec._User_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var workflowImplementors = []string{"Workflow"}
-
-func (ec *executionContext) _Workflow(ctx context.Context, sel ast.SelectionSet, obj *model.Workflow) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, workflowImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Workflow")
-		case "id":
-			out.Values[i] = ec._Workflow_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Workflow_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "specification":
-			out.Values[i] = ec._Workflow_specification(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "specificationFileURL":
-			out.Values[i] = ec._Workflow_specificationFileURL(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "creatorID":
-			out.Values[i] = ec._Workflow_creatorID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "automationID":
-			out.Values[i] = ec._Workflow_automationID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3096,6 +5290,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNIntegration2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v model.Integration) graphql.Marshaler {
 	return ec._Integration(ctx, sel, &v)
 }
@@ -3110,6 +5319,313 @@ func (ec *executionContext) marshalNIntegration2ᚖgithubᚗcomᚋgigamonoᚋgig
 	return ec._Integration(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNIntegrationInput2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegrationInput(ctx context.Context, v interface{}) (model.IntegrationInput, error) {
+	res, err := ec.unmarshalInputIntegrationInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPreferences2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPreferences(ctx context.Context, sel ast.SelectionSet, v model.Preferences) graphql.Marshaler {
+	return ec._Preferences(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPreferences2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPreferences(ctx context.Context, sel ast.SelectionSet, v *model.Preferences) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Preferences(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPrefsAutomation2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsAutomation(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsAutomation) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsAutomation2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsAutomation(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsBase2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsBase(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsBase) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsBase2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsBase(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsDeck2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsDeck) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsDeck2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsLayout2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsLayout(ctx context.Context, sel ast.SelectionSet, v *model.PrefsLayout) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PrefsLayout(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPrefsSpace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsSpace(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsSpace) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsSpace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsSpace(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsTable2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsTable(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsTable) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsTable2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsTable(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsWorkflow2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkflow(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsWorkflow) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkflow(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPrefsWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx context.Context, sel ast.SelectionSet, v []*model.PrefsWorkspace) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPrefsWorkspace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNProfile2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v model.Profile) graphql.Marshaler {
+	return ec._Profile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfile(ctx context.Context, sel ast.SelectionSet, v *model.Profile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Profile(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProfileInput2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐProfileInput(ctx context.Context, v interface{}) (model.ProfileInput, error) {
+	res, err := ec.unmarshalInputProfileInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNSessionUser2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐSessionUser(ctx context.Context, sel ast.SelectionSet, v model.SessionUser) graphql.Marshaler {
 	return ec._SessionUser(ctx, sel, &v)
 }
@@ -3122,6 +5638,43 @@ func (ec *executionContext) marshalNSessionUser2ᚖgithubᚗcomᚋgigamonoᚋgig
 		return graphql.Null
 	}
 	return ec._SessionUser(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNShortcut2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx context.Context, sel ast.SelectionSet, v []*model.Shortcut) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOShortcut2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3152,20 +5705,6 @@ func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋg
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNWorkflow2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v model.Workflow) graphql.Marshaler {
-	return ec._Workflow(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.Workflow) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Workflow(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -3421,6 +5960,62 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
+func (ec *executionContext) marshalOPrefsAutomation2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsAutomation(ctx context.Context, sel ast.SelectionSet, v *model.PrefsAutomation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsAutomation(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsBase2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsBase(ctx context.Context, sel ast.SelectionSet, v *model.PrefsBase) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsBase(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsDeck2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx context.Context, sel ast.SelectionSet, v *model.PrefsDeck) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsDeck(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsSpace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsSpace(ctx context.Context, sel ast.SelectionSet, v *model.PrefsSpace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsSpace(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsTable2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsTable(ctx context.Context, sel ast.SelectionSet, v *model.PrefsTable) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsTable(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.PrefsWorkflow) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsWorkflow(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPrefsWorkspace2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx context.Context, sel ast.SelectionSet, v *model.PrefsWorkspace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PrefsWorkspace(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOShortcut2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐShortcut(ctx context.Context, sel ast.SelectionSet, v *model.Shortcut) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Shortcut(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3458,13 +6053,6 @@ func (ec *executionContext) marshalOVoid2ᚖstring(ctx context.Context, sel ast.
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
-}
-
-func (ec *executionContext) marshalOWorkflow2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐWorkflow(ctx context.Context, sel ast.SelectionSet, v *model.Workflow) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Workflow(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

@@ -17,19 +17,88 @@ type Integration struct {
 	SpecificationFileURL string `json:"specificationFileURL" `
 	CreatorID            string `json:"creatorID" `
 }
-type SessionUser struct {
+type IntegrationInput struct {
+	Specification string `json:"specification" `
+}
+type Preferences struct {
+	ID                  string            `json:"id" `
+	UserID              string            `json:"userID" `
+	FocusWorkspaceIndex int               `json:"focusWorkspaceIndex" `
+	Workspaces          []*PrefsWorkspace `json:"workspaces" `
+}
+type PrefsAutomation struct {
+	ID                 string           `json:"id" `
+	FocusWorkflowIndex int              `json:"focusWorkflowIndex" `
+	Workflows          []*PrefsWorkflow `json:"workflows" `
+}
+type PrefsBase struct {
+	ID              string        `json:"id" `
+	FocusTableIndex int           `json:"focusTableIndex" `
+	Tables          []*PrefsTable `json:"tables" `
+}
+type PrefsBoard struct {
 	ID string `json:"id" `
+}
+type PrefsDeck struct {
+	ID              string       `json:"id" `
+	FocusBoardIndex int          `json:"focusBoardIndex" `
+	Decks           []*PrefsDeck `json:"decks" `
+}
+type PrefsLayout struct {
+	MainShortcuts  []*Shortcut `json:"mainShortcuts" `
+	QuickShortcuts []*Shortcut `json:"quickShortcuts" `
+	OtherShortcuts []*Shortcut `json:"otherShortcuts" `
+}
+type PrefsSpace struct {
+	ID                   string             `json:"id" `
+	FocusDeckIndex       int                `json:"focusDeckIndex" `
+	FocusAppIndex        int                `json:"focusAppIndex" `
+	FocusAutomationIndex int                `json:"focusAutomationIndex" `
+	FocusBaseIndex       int                `json:"focusBaseIndex" `
+	Decks                []*PrefsDeck       `json:"decks" `
+	Automations          []*PrefsAutomation `json:"automations" `
+	Bases                []*PrefsBase       `json:"bases" `
+}
+type PrefsTable struct {
+	ID string `json:"id" `
+}
+type PrefsWorkflow struct {
+	ID string `json:"id" `
+}
+type PrefsWorkspace struct {
+	ID              string        `json:"id" `
+	FocusSpaceIndex int           `json:"focusSpaceIndex" `
+	Spaces          []*PrefsSpace `json:"spaces" `
+	Layout          *PrefsLayout  `json:"layout" `
+}
+type Profile struct {
+	ID        string  `json:"id" `
+	Username  *string `json:"username" `
+	FirstName *string `json:"firstName" `
+	LastName  *string `json:"lastName" `
+	Email     *string `json:"email" `
+	AvatarURL *string `json:"avatarURL" `
+	UserID    string  `json:"userID" `
+}
+type ProfileInput struct {
+	Username  *string `json:"username" `
+	FirstName *string `json:"firstName" `
+	LastName  *string `json:"lastName" `
+	Email     *string `json:"email" `
+	AvatarURL *string `json:"avatarURL" `
+}
+type SessionUser struct {
+	ID          string       `json:"id" `
+	Profile     *Profile     `json:"profile" `
+	Preferences *Preferences `json:"preferences" `
+}
+type Shortcut struct {
+	IconName   string `json:"iconName" `
+	EntityName string `json:"entityName" `
+	Route      string `json:"route" `
 }
 type User struct {
 	ID string `json:"id" `
-}
-type Workflow struct {
-	ID                   string `json:"id" `
-	Name                 string `json:"name" `
-	Specification        string `json:"specification" `
-	SpecificationFileURL string `json:"specificationFileURL" `
-	CreatorID            string `json:"creatorID" `
-	AutomationID         string `json:"automationID" `
 }
 type Directive struct {
 	Name        string                      `json:"name" `

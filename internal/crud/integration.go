@@ -2,7 +2,6 @@ package crud
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -22,12 +21,12 @@ import (
 )
 
 // CreateIntegration creates a new integration in the database.
-func CreateIntegration(ctx context.Context, app *inits.App, specification string) (*model.Integration, error) {
+func CreateIntegration(ctx context.Context, app *inits.App, integrationInput *model.IntegrationInput) (*model.Integration, error) {
 	// TODO: Sec: Validation. Permission.
-	userID := ctx.Value(middleware.SessionDataKey).(middleware.SessionData).UserID
+	userID := ctx.Value(middleware.SessionDataKey).(middleware.SessionData).User.ID
 
 	// TODO: Validate integration config.
-	integrationConfig, err := configs.NewIntegrationConfig(specification, configs.JSON)
+	integrationConfig, err := configs.NewIntegrationConfig(integrationInput.Specification, configs.JSON)
 	if err != nil {
 		return nil, response.Error(ctx, err.Error())
 	}
@@ -39,26 +38,21 @@ func CreateIntegration(ctx context.Context, app *inits.App, specification string
 	}
 
 	// Save integration to a file.
-	if _, err = app.Filestore.Project.WriteToFile(filePath, []byte(specification)); err != nil {
+	if _, err = app.Filestore.Project.WriteToFile(filePath, []byte(integrationInput.Specification)); err != nil {
 		panic(errs.NewSystemError("", "writing integration spec to file", err))
 	}
 
 	// Create the integration in db.
-	integration := resource.Integration{Name: integrationConfig.Metadata.Name, CreatorID: &userID, SpecificationFileURL: filePath}
+	integration := resource.Integration{Name: integrationConfig.Metadata.Name, CreatorID: userID, SpecificationFileURL: filePath}
 	if err = integration.Create(&app.DB); err != nil {
 		panic(errs.NewSystemError("", "creating integration", err))
 	}
 
-	return &model.Integration{
-		ID:                   integration.ID.String(),
-		Name:                 integration.Name,
-		CreatorID:            integration.CreatorID.String(),
-		SpecificationFileURL: integration.SpecificationFileURL,
-	}, nil
+	return CopyIntegration(&integration), nil
 }
 
 // UploadIntegrationAvatar uploads the avatar of an associated integration.
-func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID string, file graphql.Upload) (*string, error) {
+func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID *string, file *graphql.Upload) (*string, error) {
 	// TODO: Sec: Validation. Permission.
 	// Get file extension.
 	ext := strings.TrimPrefix(filepath.Ext(file.Filename), ".")
@@ -80,12 +74,10 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 		panic(errs.NewSystemError("", "writing integration avatar to file", err))
 	}
 
-	integrationUUID, err := uuid.FromString(integrationID)
+	integrationUUID, err := uuid.FromString(*integrationID)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("100")
 
 	// Get the integration from db.
 	integration := resource.Integration{Base: models.Base{ID: integrationUUID}}
@@ -99,18 +91,25 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 		panic(errs.NewSystemError("", "reading integration spec", err))
 	}
 
-	fmt.Println("200")
-
 	// Parse spec file.
 	specificationConfig, err := configs.NewIntegrationConfig(specificationString, configs.JSON)
 	if err != nil {
 		panic(errs.NewSystemError("", "parsing integration spec", err))
 	}
 
+	// Delete old image file if one exists.
+	if specificationConfig.Metadata.AvatarURL != nil {
+		oldAvatarPath := strings.TrimPrefix(
+			*specificationConfig.Metadata.AvatarURL,
+			app.Config.Filestore.Image.Paths.Public+"/",
+		)
+		if _, err := app.Filestore.Image.DeleteFile(oldAvatarPath); err != nil {
+			panic(errs.NewSystemError("", "deleting old integration avatar", err))
+		}
+	}
+
 	// Update the spec avatar url.
 	specificationConfig.Metadata.AvatarURL = strs.GetAddress(app.Filestore.Image.GetPublicPath(avatarPath))
-
-	fmt.Println("300")
 
 	// Generate json string from updated config.
 	specificationJSON, err := specificationConfig.JSON()
@@ -123,20 +122,13 @@ func UploadIntegrationAvatar(_ context.Context, app *inits.App, integrationID st
 		panic(errs.NewSystemError("", "writing integration spec to file", err))
 	}
 
-	fmt.Println("400")
-
 	return new(string), nil
 }
 
-// func PatchIntegrationSpecification(ctx context.Context, id string, patch string) (*model.Integration, error) {
-// 	// TODO: Sec: Validation. Permissions.
-// 	userID := ctx.Value(middleware.SessionDataKey).(middleware.SessionData).Claims.Subject
-// }
-
 // GetIntegration gets an existing integration from the database.
-func GetIntegration(_ context.Context, app *inits.App, integrationID string) (*model.Integration, error) {
+func GetIntegration(_ context.Context, app *inits.App, integrationID *string) (*model.Integration, error) {
 	// TODO: Sec: Validation, Permission.
-	integrationUUID, err := uuid.FromString(integrationID)
+	integrationUUID, err := uuid.FromString(*integrationID)
 	if err != nil {
 		panic(err)
 	}
@@ -147,10 +139,15 @@ func GetIntegration(_ context.Context, app *inits.App, integrationID string) (*m
 		panic(errs.NewSystemError("", "getting integration", err))
 	}
 
+	return CopyIntegration(&integration), nil
+}
+
+// CopyIntegration copies integration from one struct to another.
+func CopyIntegration(integration *resource.Integration) *model.Integration {
 	return &model.Integration{
 		ID:                   integration.ID.String(),
 		Name:                 integration.Name,
 		CreatorID:            integration.CreatorID.String(),
 		SpecificationFileURL: integration.SpecificationFileURL,
-	}, nil
+	}
 }

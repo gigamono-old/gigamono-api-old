@@ -5,3 +5,8 @@ type Integration {
   specificationFileURL: String!
   creatorID: String!
 }
+
+
+input IntegrationInput {
+  specification: String!
+}

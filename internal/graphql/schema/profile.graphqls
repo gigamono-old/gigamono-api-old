@@ -1,0 +1,17 @@
+type Profile {
+  id: String!
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  avatarURL: String
+  userID: String!
+}
+
+input ProfileInput {
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  avatarURL: String
+}
