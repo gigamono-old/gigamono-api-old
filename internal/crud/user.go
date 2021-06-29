@@ -2,7 +2,6 @@ package crud
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gigamono/gigamono-api/internal/graphql/model"
 	"github.com/gigamono/gigamono/pkg/database/models"
@@ -31,6 +30,7 @@ func GetSessionUser(ctx context.Context, app *inits.App) (*model.SessionUser, er
 }
 
 // GetSessionUserPreferences gets user's preferences from the database.
+// Dataloader is not needed for this because there is really only going to be one session user.
 func GetSessionUserPreferences(_ context.Context, app *inits.App, userID *string) (*model.Preferences, error) {
 	// TODO: Sec: Validation, Permission.
 	userUUID, err := uuid.FromString(*userID)

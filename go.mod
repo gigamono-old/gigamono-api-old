@@ -11,6 +11,7 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/jinzhu/copier v0.3.2
 	github.com/soheilhy/cmux v0.1.4
+	github.com/vektah/dataloaden v0.3.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/grpc v1.27.0
