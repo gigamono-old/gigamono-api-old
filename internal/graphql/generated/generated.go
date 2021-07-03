@@ -62,10 +62,9 @@ type ComplexityRoot struct {
 	}
 
 	Preferences struct {
-		FocusWorkspaceIndex func(childComplexity int) int
-		ID                  func(childComplexity int) int
-		UserID              func(childComplexity int) int
-		Workspaces          func(childComplexity int) int
+		Details func(childComplexity int) int
+		ID      func(childComplexity int) int
+		UserID  func(childComplexity int) int
 	}
 
 	PrefsAutomation struct {
@@ -88,6 +87,11 @@ type ComplexityRoot struct {
 		Decks           func(childComplexity int) int
 		FocusBoardIndex func(childComplexity int) int
 		ID              func(childComplexity int) int
+	}
+
+	PrefsDetails struct {
+		FocusWorkspaceIndex func(childComplexity int) int
+		Workspaces          func(childComplexity int) int
 	}
 
 	PrefsLayout struct {
@@ -281,12 +285,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UploadProfileAvatar(childComplexity, args["id"].(string), args["file"].(graphql.Upload)), true
 
-	case "Preferences.focusWorkspaceIndex":
-		if e.complexity.Preferences.FocusWorkspaceIndex == nil {
+	case "Preferences.details":
+		if e.complexity.Preferences.Details == nil {
 			break
 		}
 
-		return e.complexity.Preferences.FocusWorkspaceIndex(childComplexity), true
+		return e.complexity.Preferences.Details(childComplexity), true
 
 	case "Preferences.id":
 		if e.complexity.Preferences.ID == nil {
@@ -301,13 +305,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Preferences.UserID(childComplexity), true
-
-	case "Preferences.workspaces":
-		if e.complexity.Preferences.Workspaces == nil {
-			break
-		}
-
-		return e.complexity.Preferences.Workspaces(childComplexity), true
 
 	case "PrefsAutomation.focusWorkflowIndex":
 		if e.complexity.PrefsAutomation.FocusWorkflowIndex == nil {
@@ -378,6 +375,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PrefsDeck.ID(childComplexity), true
+
+	case "PrefsDetails.focusWorkspaceIndex":
+		if e.complexity.PrefsDetails.FocusWorkspaceIndex == nil {
+			break
+		}
+
+		return e.complexity.PrefsDetails.FocusWorkspaceIndex(childComplexity), true
+
+	case "PrefsDetails.workspaces":
+		if e.complexity.PrefsDetails.Workspaces == nil {
+			break
+		}
+
+		return e.complexity.PrefsDetails.Workspaces(childComplexity), true
 
 	case "PrefsLayout.mainShortcuts":
 		if e.complexity.PrefsLayout.MainShortcuts == nil {
@@ -733,23 +744,27 @@ type Mutation {
 	{Name: "internal/graphql/schema/preferences.graphqls", Input: `type Preferences {
   id: String!
   userID: String!
-  focusWorkspaceIndex: Int!
+  details: PrefsDetails!
+}
+
+type PrefsDetails {
+  focusWorkspaceIndex: Int
   workspaces: [PrefsWorkspace]!
 }
 
 type PrefsWorkspace {
   id: String!
-  focusSpaceIndex: Int!
+  focusSpaceIndex: Int
   spaces: [PrefsSpace]!
   layout: PrefsLayout!
 }
 
 type PrefsSpace {
   id: String!
-  focusDeckIndex: Int!
-  focusAppIndex: Int!
-  focusAutomationIndex: Int!
-  focusBaseIndex: Int!
+  focusDeckIndex: Int
+  focusAppIndex: Int
+  focusAutomationIndex: Int
+  focusBaseIndex: Int
   decks: [PrefsDeck]!
   automations: [PrefsAutomation]!
   bases: [PrefsBase]!
@@ -757,19 +772,19 @@ type PrefsSpace {
 
 type PrefsDeck {
   id: String!
-  focusBoardIndex: Int!
+  focusBoardIndex: Int
   decks: [PrefsDeck]!
 }
 
 type PrefsAutomation {
   id: String!
-  focusWorkflowIndex: Int!
+  focusWorkflowIndex: Int
   workflows: [PrefsWorkflow]!
 }
 
 type PrefsBase {
   id: String!
-  focusTableIndex: Int!
+  focusTableIndex: Int
   tables: [PrefsTable]!
 }
 
@@ -824,7 +839,7 @@ type User {
 type SessionUser {
   id: String!
   profile: Profile!
-  preferences: Preferences!
+  preferences: Preferences! # Lazy load
 }
 `, BuiltIn: false},
 }
@@ -1492,7 +1507,7 @@ func (ec *executionContext) _Preferences_userID(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Preferences_focusWorkspaceIndex(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
+func (ec *executionContext) _Preferences_details(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1510,7 +1525,7 @@ func (ec *executionContext) _Preferences_focusWorkspaceIndex(ctx context.Context
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.FocusWorkspaceIndex, nil
+		return obj.Details, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1522,44 +1537,9 @@ func (ec *executionContext) _Preferences_focusWorkspaceIndex(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*model.PrefsDetails)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Preferences_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.Preferences) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Preferences",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Workspaces, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PrefsWorkspace)
-	fc.Result = res
-	return ec.marshalNPrefsWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx, field.Selections, res)
+	return ec.marshalNPrefsDetails2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDetails(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsAutomation_id(ctx context.Context, field graphql.CollectedField, obj *model.PrefsAutomation) (ret graphql.Marshaler) {
@@ -1622,14 +1602,11 @@ func (ec *executionContext) _PrefsAutomation_focusWorkflowIndex(ctx context.Cont
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsAutomation_workflows(ctx context.Context, field graphql.CollectedField, obj *model.PrefsAutomation) (ret graphql.Marshaler) {
@@ -1727,14 +1704,11 @@ func (ec *executionContext) _PrefsBase_focusTableIndex(ctx context.Context, fiel
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsBase_tables(ctx context.Context, field graphql.CollectedField, obj *model.PrefsBase) (ret graphql.Marshaler) {
@@ -1867,14 +1841,11 @@ func (ec *executionContext) _PrefsDeck_focusBoardIndex(ctx context.Context, fiel
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsDeck_decks(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDeck) (ret graphql.Marshaler) {
@@ -1910,6 +1881,73 @@ func (ec *executionContext) _PrefsDeck_decks(ctx context.Context, field graphql.
 	res := resTmp.([]*model.PrefsDeck)
 	fc.Result = res
 	return ec.marshalNPrefsDeck2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDeck(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsDetails_focusWorkspaceIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FocusWorkspaceIndex, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PrefsDetails_workspaces(ctx context.Context, field graphql.CollectedField, obj *model.PrefsDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PrefsDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workspaces, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PrefsWorkspace)
+	fc.Result = res
+	return ec.marshalNPrefsWorkspace2ᚕᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsWorkspace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsLayout_mainShortcuts(ctx context.Context, field graphql.CollectedField, obj *model.PrefsLayout) (ret graphql.Marshaler) {
@@ -2077,14 +2115,11 @@ func (ec *executionContext) _PrefsSpace_focusDeckIndex(ctx context.Context, fiel
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsSpace_focusAppIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
@@ -2112,14 +2147,11 @@ func (ec *executionContext) _PrefsSpace_focusAppIndex(ctx context.Context, field
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsSpace_focusAutomationIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
@@ -2147,14 +2179,11 @@ func (ec *executionContext) _PrefsSpace_focusAutomationIndex(ctx context.Context
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsSpace_focusBaseIndex(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
@@ -2182,14 +2211,11 @@ func (ec *executionContext) _PrefsSpace_focusBaseIndex(ctx context.Context, fiel
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsSpace_decks(ctx context.Context, field graphql.CollectedField, obj *model.PrefsSpace) (ret graphql.Marshaler) {
@@ -2427,14 +2453,11 @@ func (ec *executionContext) _PrefsWorkspace_focusSpaceIndex(ctx context.Context,
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PrefsWorkspace_spaces(ctx context.Context, field graphql.CollectedField, obj *model.PrefsWorkspace) (ret graphql.Marshaler) {
@@ -4452,13 +4475,8 @@ func (ec *executionContext) _Preferences(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "focusWorkspaceIndex":
-			out.Values[i] = ec._Preferences_focusWorkspaceIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "workspaces":
-			out.Values[i] = ec._Preferences_workspaces(ctx, field, obj)
+		case "details":
+			out.Values[i] = ec._Preferences_details(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4491,9 +4509,6 @@ func (ec *executionContext) _PrefsAutomation(ctx context.Context, sel ast.Select
 			}
 		case "focusWorkflowIndex":
 			out.Values[i] = ec._PrefsAutomation_focusWorkflowIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "workflows":
 			out.Values[i] = ec._PrefsAutomation_workflows(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4528,9 +4543,6 @@ func (ec *executionContext) _PrefsBase(ctx context.Context, sel ast.SelectionSet
 			}
 		case "focusTableIndex":
 			out.Values[i] = ec._PrefsBase_focusTableIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "tables":
 			out.Values[i] = ec._PrefsBase_tables(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4592,11 +4604,37 @@ func (ec *executionContext) _PrefsDeck(ctx context.Context, sel ast.SelectionSet
 			}
 		case "focusBoardIndex":
 			out.Values[i] = ec._PrefsDeck_focusBoardIndex(ctx, field, obj)
+		case "decks":
+			out.Values[i] = ec._PrefsDeck_decks(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "decks":
-			out.Values[i] = ec._PrefsDeck_decks(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var prefsDetailsImplementors = []string{"PrefsDetails"}
+
+func (ec *executionContext) _PrefsDetails(ctx context.Context, sel ast.SelectionSet, obj *model.PrefsDetails) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, prefsDetailsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PrefsDetails")
+		case "focusWorkspaceIndex":
+			out.Values[i] = ec._PrefsDetails_focusWorkspaceIndex(ctx, field, obj)
+		case "workspaces":
+			out.Values[i] = ec._PrefsDetails_workspaces(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4666,24 +4704,12 @@ func (ec *executionContext) _PrefsSpace(ctx context.Context, sel ast.SelectionSe
 			}
 		case "focusDeckIndex":
 			out.Values[i] = ec._PrefsSpace_focusDeckIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "focusAppIndex":
 			out.Values[i] = ec._PrefsSpace_focusAppIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "focusAutomationIndex":
 			out.Values[i] = ec._PrefsSpace_focusAutomationIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "focusBaseIndex":
 			out.Values[i] = ec._PrefsSpace_focusBaseIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "decks":
 			out.Values[i] = ec._PrefsSpace_decks(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4782,9 +4808,6 @@ func (ec *executionContext) _PrefsWorkspace(ctx context.Context, sel ast.Selecti
 			}
 		case "focusSpaceIndex":
 			out.Values[i] = ec._PrefsWorkspace_focusSpaceIndex(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "spaces":
 			out.Values[i] = ec._PrefsWorkspace_spaces(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5290,21 +5313,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) marshalNIntegration2githubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐIntegration(ctx context.Context, sel ast.SelectionSet, v model.Integration) graphql.Marshaler {
 	return ec._Integration(ctx, sel, &v)
 }
@@ -5447,6 +5455,16 @@ func (ec *executionContext) marshalNPrefsDeck2ᚕᚖgithubᚗcomᚋgigamonoᚋgi
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNPrefsDetails2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsDetails(ctx context.Context, sel ast.SelectionSet, v *model.PrefsDetails) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PrefsDetails(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPrefsLayout2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsLayout(ctx context.Context, sel ast.SelectionSet, v *model.PrefsLayout) graphql.Marshaler {
@@ -5958,6 +5976,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*v)
 }
 
 func (ec *executionContext) marshalOPrefsAutomation2ᚖgithubᚗcomᚋgigamonoᚋgigamonoᚑapiᚋinternalᚋgraphqlᚋmodelᚐPrefsAutomation(ctx context.Context, sel ast.SelectionSet, v *model.PrefsAutomation) graphql.Marshaler {

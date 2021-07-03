@@ -21,19 +21,18 @@ type IntegrationInput struct {
 	Specification string `json:"specification" `
 }
 type Preferences struct {
-	ID                  string            `json:"id" `
-	UserID              string            `json:"userID" `
-	FocusWorkspaceIndex int               `json:"focusWorkspaceIndex" `
-	Workspaces          []*PrefsWorkspace `json:"workspaces" `
+	ID      string        `json:"id" `
+	UserID  string        `json:"userID" `
+	Details *PrefsDetails `json:"details" `
 }
 type PrefsAutomation struct {
 	ID                 string           `json:"id" `
-	FocusWorkflowIndex int              `json:"focusWorkflowIndex" `
+	FocusWorkflowIndex *int             `json:"focusWorkflowIndex" `
 	Workflows          []*PrefsWorkflow `json:"workflows" `
 }
 type PrefsBase struct {
 	ID              string        `json:"id" `
-	FocusTableIndex int           `json:"focusTableIndex" `
+	FocusTableIndex *int          `json:"focusTableIndex" `
 	Tables          []*PrefsTable `json:"tables" `
 }
 type PrefsBoard struct {
@@ -41,8 +40,12 @@ type PrefsBoard struct {
 }
 type PrefsDeck struct {
 	ID              string       `json:"id" `
-	FocusBoardIndex int          `json:"focusBoardIndex" `
+	FocusBoardIndex *int         `json:"focusBoardIndex" `
 	Decks           []*PrefsDeck `json:"decks" `
+}
+type PrefsDetails struct {
+	FocusWorkspaceIndex *int              `json:"focusWorkspaceIndex" `
+	Workspaces          []*PrefsWorkspace `json:"workspaces" `
 }
 type PrefsLayout struct {
 	MainShortcuts  []*Shortcut `json:"mainShortcuts" `
@@ -51,10 +54,10 @@ type PrefsLayout struct {
 }
 type PrefsSpace struct {
 	ID                   string             `json:"id" `
-	FocusDeckIndex       int                `json:"focusDeckIndex" `
-	FocusAppIndex        int                `json:"focusAppIndex" `
-	FocusAutomationIndex int                `json:"focusAutomationIndex" `
-	FocusBaseIndex       int                `json:"focusBaseIndex" `
+	FocusDeckIndex       *int               `json:"focusDeckIndex" `
+	FocusAppIndex        *int               `json:"focusAppIndex" `
+	FocusAutomationIndex *int               `json:"focusAutomationIndex" `
+	FocusBaseIndex       *int               `json:"focusBaseIndex" `
 	Decks                []*PrefsDeck       `json:"decks" `
 	Automations          []*PrefsAutomation `json:"automations" `
 	Bases                []*PrefsBase       `json:"bases" `
@@ -67,7 +70,7 @@ type PrefsWorkflow struct {
 }
 type PrefsWorkspace struct {
 	ID              string        `json:"id" `
-	FocusSpaceIndex int           `json:"focusSpaceIndex" `
+	FocusSpaceIndex *int          `json:"focusSpaceIndex" `
 	Spaces          []*PrefsSpace `json:"spaces" `
 	Layout          *PrefsLayout  `json:"layout" `
 }

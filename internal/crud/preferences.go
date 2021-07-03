@@ -31,18 +31,9 @@ func GetPreferences(_ context.Context, app *inits.App, preferencesID *string) (*
 
 // CopyPreferences copies preferences from one struct to another.
 func CopyPreferences(preferences *resource.Preferences) *model.Preferences {
-	workspaces := []*model.PrefsWorkspace{}
-	focusWorkspaceIndex := -1
+	newPreferences := &model.Preferences{}
 
-	if preferences.Details != nil {
-		copier.Copy(&workspaces, &preferences.Details.Workspaces)
-		focusWorkspaceIndex = int(preferences.Details.FocusWorkspaceIndex)
-	}
+	copier.Copy(newPreferences, preferences) // Ignore error.
 
-	return &model.Preferences{
-		ID:                  preferences.ID.String(),
-		UserID:              preferences.UserID.String(),
-		FocusWorkspaceIndex: focusWorkspaceIndex,
-		Workspaces:          workspaces,
-	}
+	return newPreferences
 }
